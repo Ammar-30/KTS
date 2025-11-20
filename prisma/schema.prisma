@@ -1,0 +1,79 @@
+// Datasource: SQLite via .env DATABASE_URL="file:./dev.db"
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// SQLite has no enum; we use strings with known values.
+// Role: "EMPLOYEE" | "MANAGER" | "TRANSPORT" | "ADMIN"
+// TripStatus: "Requested" | "ManagerApproved" | "ManagerRejected" | "TransportAssigned" | "InProgress" | "Completed"
+// Company: "KIPS_PREPS" | "TETB" | "QUALITY_BRANDS" | "KDP"
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("EMPLOYEE")
+  createdAt    DateTime @default(now())
+  trips        Trip[]   @relation("RequesterTrips")
+}
+
+model Driver {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  licenseNo String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  trips Trip[] @relation("DriverTrips")
+}
+
+model Vehicle {
+  id        String   @id @default(cuid())
+  number    String   @unique // e.g. LEA-1234
+  type      String?
+  capacity  Int?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  trips Trip[] @relation("VehicleTrips")
+}
+
+model Trip {
+  id       String   @id @default(cuid())
+  purpose  String
+  fromLoc  String
+  toLoc    String
+  fromTime DateTime
+  toTime   DateTime
+
+  company    String
+  department String?
+
+  status    String   @default("Requested")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  requester   User   @relation("RequesterTrips", fields: [requesterId], references: [id])
+  requesterId String
+
+  approvedById String?
+  assignedById String?
+
+  // assignment relations (nullable until assigned)
+  driver   Driver? @relation("DriverTrips", fields: [driverId], references: [id])
+  driverId String?
+
+  vehicle   Vehicle? @relation("VehicleTrips", fields: [vehicleId], references: [id])
+  vehicleId String?
+
+  // snapshot text for email/history
+  driverName    String?
+  vehicleNumber String?
+}
