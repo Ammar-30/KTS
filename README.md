@@ -28,8 +28,8 @@ npm run studio
 ```
 
 ### Accounts (seeded)
-- EMPLOYEE: ammar@kips.pk / Pass@1234
-- MANAGER : salman@kips.pk / Pass@1234
+- EMPLOYEE: salmanammar322@gmail.com / Pass@1234
+- MANAGER : salmanmaqsood7@gmail.com / Pass@1234
 - TRANSPORT: transport@kips.pk / Pass@1234
 
 ## Env
