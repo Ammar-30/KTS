@@ -87,8 +87,8 @@ function companyLabel(c: string) {
 }
 
 export default async function TransportPage({
-                                                searchParams,
-                                            }: {
+    searchParams,
+}: {
     searchParams: Promise<{ notice?: string; kind?: "success" | "error" }>;
 }) {
     await getSessionGuard();
@@ -118,88 +118,103 @@ export default async function TransportPage({
         <>
             {notice && <div className={`banner ${kind}`}>{notice}</div>}
 
+            <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
+                <a href="/transport/manage" className="button secondary">
+                    ⚙️ Manage Drivers & Vehicles
+                </a>
+            </div>
+
             <div className="card">
                 <h2>Approved Trips to Assign</h2>
 
                 <div className="table-wrap">
                     <table className="table">
                         <thead>
-                        <tr>
-                            <th>Requester</th>
-                            <th>Company</th>
-                            <th>Department</th>
-                            <th>Purpose</th>
-                            <th>From → To</th>
-                            <th>Time</th>
-                            <th style={{ minWidth: 360 }}>Assign</th>
-                        </tr>
+                            <tr>
+                                <th>Requester</th>
+                                <th>Company</th>
+                                <th>Department</th>
+                                <th>Purpose</th>
+                                <th>From → To</th>
+                                <th>Time</th>
+                                <th style={{ minWidth: 360 }}>Assign</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        {items.map((t) => {
-                            const avail = availability.get(t.id)!;
-                            return (
-                                <tr key={t.id}>
-                                    <td>
-                                        {t.requester.name}
-                                        <div className="helper">({t.requester.email})</div>
-                                    </td>
-                                    <td>{companyLabel(t.company)}</td>
-                                    <td>{t.department ?? "-"}</td>
-                                    <td>{t.purpose}</td>
-                                    <td>
-                                        {t.fromLoc} → {t.toLoc}
-                                    </td>
-                                    <td>
-                                        {fmtDateTime(t.fromTime)} → {fmtDateTime(t.toTime)}
-                                    </td>
-                                    <td>
-                                        <form
-                                            action="/api/trips/assign"
-                                            method="post"
-                                            className="actions"
-                                            style={{ gap: 8, flexWrap: "wrap" }}
-                                        >
-                                            <input type="hidden" name="tripId" value={t.id} />
+                            {items.map((t) => {
+                                const avail = availability.get(t.id)!;
+                                return (
+                                    <tr key={t.id}>
+                                        <td>
+                                            {t.requester.name}
+                                            <div className="helper">({t.requester.email})</div>
+                                        </td>
+                                        <td>{companyLabel(t.company)}</td>
+                                        <td>{t.department ?? "-"}</td>
+                                        <td>{t.purpose}</td>
+                                        <td>
+                                            {t.fromLoc} → {t.toLoc}
+                                        </td>
+                                        <td>
+                                            {fmtDateTime(t.fromTime)} → {fmtDateTime(t.toTime)}
+                                        </td>
+                                        <td>
+                                            <form
+                                                action="/api/trips/assign"
+                                                method="post"
+                                                className="actions"
+                                                style={{ gap: 8, flexWrap: "wrap" }}
+                                            >
+                                                <input type="hidden" name="tripId" value={t.id} />
 
-                                            <select name="driverId" required style={{ minWidth: 160 }}>
-                                                <option value="">Select driver…</option>
-                                                {avail.drivers.map((d) => (
-                                                    <option key={d.id} value={d.id}>
-                                                        {d.label}
-                                                    </option>
-                                                ))}
-                                            </select>
+                                                <select name="driverId" required style={{ minWidth: 160 }}>
+                                                    <option value="">Select driver…</option>
+                                                    {avail.drivers.map((d) => (
+                                                        <option key={d.id} value={d.id}>
+                                                            {d.label}
+                                                        </option>
+                                                    ))}
+                                                </select>
 
-                                            <select name="vehicleId" required style={{ minWidth: 160 }}>
-                                                <option value="">Select vehicle…</option>
-                                                {avail.vehicles.map((v) => (
-                                                    <option key={v.id} value={v.id}>
-                                                        {v.label}
-                                                    </option>
-                                                ))}
-                                            </select>
+                                                <select name="vehicleId" required style={{ minWidth: 160 }}>
+                                                    <option value="">Select vehicle…</option>
+                                                    {avail.vehicles.map((v) => (
+                                                        <option key={v.id} value={v.id}>
+                                                            {v.label}
+                                                        </option>
+                                                    ))}
+                                                </select>
 
-                                            <button type="submit" className="button">
-                                                Assign
-                                            </button>
-                                        </form>
+                                                <input
+                                                    name="startMileage"
+                                                    type="number"
+                                                    placeholder="Mileage"
+                                                    required
+                                                    min="0"
+                                                    style={{ width: 100 }}
+                                                />
 
-                                        {(avail.drivers.length === 0 || avail.vehicles.length === 0) && (
-                                            <div className="helper" style={{ marginTop: 6 }}>
-                                                {avail.drivers.length === 0 && "No available drivers for this slot. "}
-                                                {avail.vehicles.length === 0 && "No available vehicles for this slot."}
-                                            </div>
-                                        )}
-                                    </td>
+                                                <button type="submit" className="button">
+                                                    Assign
+                                                </button>
+                                            </form>
+
+                                            {(avail.drivers.length === 0 || avail.vehicles.length === 0) && (
+                                                <div className="helper" style={{ marginTop: 6 }}>
+                                                    {avail.drivers.length === 0 && "No available drivers for this slot. "}
+                                                    {avail.vehicles.length === 0 && "No available vehicles for this slot."}
+                                                </div>
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+
+                            {items.length === 0 && (
+                                <tr className="empty-row">
+                                    <td colSpan={7}>No manager-approved trips.</td>
                                 </tr>
-                            );
-                        })}
-
-                        {items.length === 0 && (
-                            <tr className="empty-row">
-                                <td colSpan={7}>No manager-approved trips.</td>
-                            </tr>
-                        )}
+                            )}
                         </tbody>
                     </table>
                 </div>

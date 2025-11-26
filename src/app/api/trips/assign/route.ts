@@ -61,15 +61,23 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { tripId, driverId, vehicleId } = (await readBody(req)) as {
+    const { tripId, driverId, vehicleId, startMileage } = (await readBody(req)) as {
         tripId?: string;
         driverId?: string;
         vehicleId?: string;
+        startMileage?: string | number;
     };
     const wantsJson = (req.headers.get("content-type") || "").includes("application/json");
 
     if (!tripId || !driverId || !vehicleId) {
         const err = "tripId, driverId and vehicleId are required.";
+        return wantsJson
+            ? NextResponse.json({ error: err }, { status: 400 })
+            : redirectBack(req, "/transport", { notice: err, kind: "error" });
+    }
+
+    if (!startMileage || isNaN(Number(startMileage)) || Number(startMileage) < 0) {
+        const err = "Valid starting mileage is required.";
         return wantsJson
             ? NextResponse.json({ error: err }, { status: 400 })
             : redirectBack(req, "/transport", { notice: err, kind: "error" });
@@ -149,6 +157,7 @@ export async function POST(req: NextRequest) {
             // keep display fields in sync
             driverName: driver.name,
             vehicleNumber: vehicle.number,
+            startMileage: startMileage ? Number(startMileage) : null,
         },
     });
 
@@ -168,27 +177,28 @@ export async function POST(req: NextRequest) {
           <tr><td style="padding:2px 8px 2px 0"><strong>Company:</strong></td><td>${companyLabel(
             trip.company
         )}</td></tr>
-          <tr><td style="padding:2px 8px 2px 0"><strong>Department:</strong></td><td>${
-            trip.department ?? "-"
-        }</td></tr>
+          <tr><td style="padding:2px 8px 2px 0"><strong>Department:</strong></td><td>${trip.department ?? "-"
+            }</td></tr>
           <tr><td style="padding:2px 8px 2px 0"><strong>From:</strong></td><td>${escapeHtml(
-            trip.fromLoc
-        )}</td></tr>
+                trip.fromLoc
+            )}</td></tr>
           <tr><td style="padding:2px 8px 2px 0"><strong>To:</strong></td><td>${escapeHtml(
-            trip.toLoc
-        )}</td></tr>
+                trip.toLoc
+            )}</td></tr>
           <tr><td style="padding:2px 8px 2px 0"><strong>Departure:</strong></td><td>${fmt(
-            trip.fromTime
-        )}</td></tr>
+                trip.fromTime
+            )}</td></tr>
           <tr><td style="padding:2px 8px 2px 0"><strong>Return:</strong></td><td>${fmt(
-            trip.toTime
-        )}</td></tr>
+                trip.toTime
+            )}</td></tr>
           <tr><td style="padding:2px 8px 2px 0"><strong>Driver:</strong></td><td>${escapeHtml(
-            driver.name
-        )}</td></tr>
+                driver.name
+            )}</td></tr>
+          <tr><td style="padding:2px 8px 2px 0"><strong>Driver Contact:</strong></td><td>${driver.phone || "Not provided"
+            }</td></tr>
           <tr><td style="padding:2px 8px 2px 0"><strong>Vehicle:</strong></td><td>${escapeHtml(
-            vehicle.number
-        )}</td></tr>
+                vehicle.number
+            )}</td></tr>
           <tr><td style="padding:2px 8px 2px 0"><strong>Trip ID:</strong></td><td>${trip.id}</td></tr>
         </table>
 
@@ -203,6 +213,7 @@ export async function POST(req: NextRequest) {
             `From: ${trip.fromLoc} → ${trip.toLoc}\n` +
             `Time: ${fmt(trip.fromTime)} → ${fmt(trip.toTime)}\n` +
             `Driver: ${driver.name}\n` +
+            `Driver Contact: ${driver.phone || "Not provided"}\n` +
             `Vehicle: ${vehicle.number}\n` +
             `Trip ID: ${trip.id}`;
 

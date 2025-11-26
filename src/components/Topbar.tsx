@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggle";
 
-type UserMeta = { name?: string; email?: string };
+type UserMeta = { name?: string; email?: string; role?: string };
 
 export default function Topbar({ user }: { user?: UserMeta }) {
     if (!user || (!user.name && !user.email)) return null;
@@ -96,6 +96,32 @@ export default function Topbar({ user }: { user?: UserMeta }) {
                     </div>
 
                     <hr style={{ borderColor: "var(--line)", margin: "8px 0" }} />
+
+                    {/* Admin Dashboard Link */}
+                    {user.role === "ADMIN" && (
+                        <>
+                            <button
+                                onClick={() => {
+                                    router.push("/admin");
+                                    setOpen(false);
+                                }}
+                                style={{
+                                    width: "100%",
+                                    padding: "8px 12px",
+                                    color: "var(--text)",
+                                    background: "transparent",
+                                    border: "none",
+                                    textAlign: "left",
+                                    cursor: "pointer",
+                                    borderRadius: 8,
+                                    fontSize: 14,
+                                }}
+                            >
+                                Admin Dashboard
+                            </button>
+                            <hr style={{ borderColor: "var(--line)", margin: "8px 0" }} />
+                        </>
+                    )}
 
                     {/* Dark Mode Toggle INSIDE dropdown */}
                     <div style={{ marginBottom: 10 }}>

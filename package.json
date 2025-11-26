@@ -9,7 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "seed": "node prisma/seed.mjs",
+    "seed": "tsx prisma/seed.ts",
     "studio": "prisma studio",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev"

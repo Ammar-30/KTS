@@ -98,6 +98,20 @@ export default async function EmployeePage({
                                     <tr key={t.id}>
                                         <td>
                                             <span className={`badge ${t.status.toLowerCase()}`}>{t.status}</span>
+                                            {t.status === "ManagerRejected" && t.rejectionReason && (
+                                                <div style={{
+                                                    marginTop: 6,
+                                                    padding: 8,
+                                                    background: "var(--warning-bg)",
+                                                    border: "1px solid rgba(217, 119, 6, 0.2)",
+                                                    borderRadius: 6,
+                                                    fontSize: 12,
+                                                    color: "var(--warning-text)",
+                                                    lineHeight: 1.4
+                                                }}>
+                                                    <strong>Reason:</strong> {t.rejectionReason}
+                                                </div>
+                                            )}
                                         </td>
                                         <td>{companyLabel(t.company)}</td>
                                         <td>{t.department ?? "-"}</td>

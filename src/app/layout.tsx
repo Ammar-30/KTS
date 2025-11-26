@@ -15,7 +15,7 @@ export default async function RootLayout({
 
     const session = await getSession();
     const user = session
-        ? { name: (session as any).name, email: (session as any).email }
+        ? { name: (session as any).name, email: (session as any).email, role: (session as any).role }
         : undefined;
 
     return (

@@ -287,6 +287,19 @@ input::placeholder {
     background: #fee2e2;
 }
 
+.button.secondary {
+    background: var(--panel);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+.button.secondary:hover {
+    background: var(--panel-hover);
+    border-color: var(--primary-light);
+    color: var(--primary);
+}
+
+
 /* ---------- Table ---------- */
 .table-container {
     overflow-x: auto;

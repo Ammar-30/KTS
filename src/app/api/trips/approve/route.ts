@@ -11,7 +11,7 @@ async function readBody(req: NextRequest) {
     return Object.fromEntries(fd.entries());
 }
 
-function redirectBack(req: NextRequest, fallback: string, qs?: Record<string,string>) {
+function redirectBack(req: NextRequest, fallback: string, qs?: Record<string, string>) {
     const ref = req.headers.get("referer") || fallback;
     const url = new URL(ref);
     if (qs) for (const [k, v] of Object.entries(qs)) url.searchParams.set(k, v);
@@ -25,7 +25,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const { tripId, decision } = await readBody(req) as { tripId?: string; decision?: string };
+    const { tripId, decision, rejectionReason } = await readBody(req) as {
+        tripId?: string;
+        decision?: string;
+        rejectionReason?: string;
+    };
     const wantsJson = (req.headers.get("content-type") || "").includes("application/json");
 
     if (!tripId || !decision) {
@@ -56,7 +60,11 @@ export async function POST(req: NextRequest) {
     const newStatus = decision === "approve" ? "ManagerApproved" : "ManagerRejected";
     await prisma.trip.update({
         where: { id: tripId },
-        data: { status: newStatus, approvedById: session.sub },
+        data: {
+            status: newStatus,
+            approvedById: session.sub,
+            rejectionReason: decision === "reject" ? (rejectionReason || null) : null,
+        },
     });
 
     const msg = decision === "approve" ? "Request approved" : "Request rejected";

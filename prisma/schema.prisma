@@ -78,4 +78,10 @@ model Trip {
   // snapshot text for email/history
   driverName    String?
   vehicleNumber String?
+  
+  // rejection feedback
+  rejectionReason String? // Manager's comment when rejecting a trip
+
+  // mileage tracking
+  startMileage Int?
 }
