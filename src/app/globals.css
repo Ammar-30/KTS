@@ -1,302 +1,390 @@
 /* =========================================================
-   Modern Clean UI — KIPS Transport
-   One-file drop-in styles. No component changes required.
+   Hyper-Modern Premium UI — KIPS Transport (2025 Redesign)
    ========================================================= */
 
-/* ---------- CSS Reset (small, safe) ---------- */
+/* ---------- CSS Reset ---------- */
 *,
 *::before,
-*::after { box-sizing: border-box; }
-* { margin: 0; }
-html, body { height: 100%; }
-img, svg, video, canvas { display: block; max-width: 100%; }
-button, input, select, textarea { font: inherit; }
+*::after {
+    box-sizing: border-box;
+}
 
-/* ---------- Theme Tokens ----------
-   Default = LIGHT. Toggle can add/remove body.light-mode (kept)
-   and body.dark-mode (also supported).
------------------------------------ */
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+img,
+svg,
+video,
+canvas {
+    display: block;
+    max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+/* ---------- Theme Tokens ---------- */
 :root {
-    /* Surfaces (Light) */
-    --bg:            #f7f8fb;
-    --panel:         #ffffff;
-    --panel-2:       #f3f5f9;
+    /* Palette: Deep Royal Blue & Cool Greys */
+    --bg: #f8f9fc;
+    --panel: #ffffff;
+    --panel-hover: #fcfdff;
 
     /* Text */
-    --text:          #0f172a;
-    --muted:         #525f78;
+    --text-main: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #94a3b8;
 
-    /* Brand/State */
-    --primary:       #2563eb;
-    --danger:        #dc2626;
-    --success:       #059669;
-    --warn:          #d97706;
+    /* Brand */
+    --primary: #1e40af;
+    /* Deep Royal Blue */
+    --primary-light: #3b82f6;
+    /* Bright Accent */
+    --primary-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
 
-    /* Lines / Elevation */
-    --line:          #e6e9f0;
-    --line-soft:     #eef1f7;
-    --shadow-1:      0 8px 24px rgba(15, 23, 42, .06);
+    /* Status Colors */
+    --success-bg: #ecfdf5;
+    --success-text: #059669;
+    --warning-bg: #fffbeb;
+    --warning-text: #d97706;
+    --danger-bg: #fef2f2;
+    --danger-text: #dc2626;
+    --info-bg: #eff6ff;
+    --info-text: #2563eb;
 
-    /* Inputs */
-    --input-bg:           #ffffff;
-    --input-text:         #0f172a;
-    --input-placeholder:  #6b7280;
-    --input-border:       #d7dce6;
-    --input-focus:        #2563eb;
+    /* UI Elements */
+    --border: #e2e8f0;
+    --border-light: #f1f5f9;
+    --input-bg: #ffffff;
+    --input-border: #cbd5e1;
+    --input-focus-ring: rgba(59, 130, 246, 0.25);
 
-    /* Radii / Spacing */
-    --radius: 12px;
-    --radius-sm: 10px;
-    --gap: 16px;
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+    --shadow-glow: 0 0 15px rgba(59, 130, 246, 0.15);
+
+    /* Radius */
+    --radius-lg: 20px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+
+    /* Transitions */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* --- Dark theme (works if body has .dark-mode OR no .light-mode when your switch uses dark default) --- */
-body.dark-mode {
-    --bg:            #0f1115;
-    --panel:         #171a21;
-    --panel-2:       #11151b;
-
-    --text:          #e8ecf2;
-    --muted:         #9aa3b2;
-
-    --primary:       #3b82f6;
-    --danger:        #ef4444;
-    --success:       #10b981;
-    --warn:          #f59e0b;
-
-    --line:          #2b313d;
-    --line-soft:     #1c2230;
-    --shadow-1:      0 10px 28px rgba(0,0,0,.35);
-
-    --input-bg:           #0b0e14;
-    --input-text:         #e8ecf2;
-    --input-placeholder:  #9aa3b2;
-    --input-border:       #2b313d;
-    --input-focus:        #3b82f6;
+/* Dark Mode Support (Optional/Future-proof) */
+@media (prefers-color-scheme: dark) {
+    /* :root {
+       --bg: #0f172a;
+       --panel: #1e293b;
+       ...
+    } */
 }
 
-/* --- Compatibility with your existing toggle that uses .light-mode ---
-   If your toggle adds body.light-mode for light, these vars already match.
-*/
-body.light-mode { /* same as :root (kept for compatibility) */ }
-
-/* ---------- Base ---------- */
-html {
-    color-scheme: light;
-}
 body {
     background: var(--bg);
-    color: var(--text);
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-    line-height: 1.5;
+    color: var(--text-main);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: background .25s ease, color .25s ease;
 }
 
-/* ---------- Page Container (normal website look) ---------- */
+/* ---------- Layout ---------- */
 .shell {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 28px 24px 40px;
+    padding: 12px 24px 60px;
+    /* Reduced top padding further to 12px */
+    animation: fadeIn 0.6s var(--ease-out);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ---------- Typography ---------- */
-h1, h2, h3 { font-weight: 800; letter-spacing: -0.01em; }
-h1 { font-size: 28px; margin-bottom: 14px; }
-h2 { font-size: 22px; margin-bottom: 12px; }
-h3 { font-size: 16px; margin-bottom: 10px; }
-p.helper { color: var(--muted); font-size: 13px; }
+h1,
+h2,
+h3 {
+    color: var(--text-main);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
 
-/* ---------- Topbar ---------- */
-.topbar {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 24px;
-    background: color-mix(in oklab, var(--panel) 70%, transparent);
-    backdrop-filter: blur(6px);
-    border-bottom: 1px solid var(--line);
+h1 {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+h3 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+p {
+    color: var(--text-secondary);
 }
 
 /* ---------- Cards ---------- */
 .card {
-    width: 100%;
     background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow-1);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+    transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+    margin-bottom: 24px;
 }
-.card + .card { margin-top: 18px; }
 
-/* ---------- Grid Rows (labels/inputs side-by-side) ---------- */
-.row {
-    display: grid;
-    gap: var(--gap);
-    grid-template-columns: 1fr 1fr;
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
-@media (max-width: 900px) {
-    .row { grid-template-columns: 1fr; }
+
+/* ---------- Forms ---------- */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--text-tertiary);
+    pointer-events: none;
+    width: 18px;
+    height: 18px;
+    z-index: 1;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    /* Left padding for icon */
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius-md);
+    color: var(--text-main);
+    font-size: 15px;
+    transition: all 0.2s var(--ease-out);
+}
+
+/* Inputs without icons need less padding */
+input:not([class*="has-icon"]),
+select:not([class*="has-icon"]) {
+    padding-left: 16px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 4px var(--input-focus-ring);
+}
+
+input::placeholder {
+    color: var(--text-tertiary);
 }
 
 /* ---------- Buttons ---------- */
-.button, button, [type="submit"] {
-    appearance: none;
-    border: 1px solid transparent;
-    background: var(--primary);
-    color: #fff;
-    padding: 10px 14px;
-    border-radius: var(--radius-sm);
-    font-weight: 700;
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    border: none;
     cursor: pointer;
-    transition: background .18s ease, transform .06s ease, box-shadow .18s ease, filter .18s ease;
-}
-.button:hover, button:hover { filter: brightness(1.03); }
-.button:active, button:active { transform: translateY(1px); }
-.button.secondary, button.secondary {
-    background: #ffffff00;
-    color: var(--text);
-    border-color: var(--line);
-}
-.button.danger, button.danger { background: var(--danger); }
-button[disabled], .button[disabled] { opacity: .6; cursor: not-allowed; }
-.button:focus-visible, button:focus-visible {
-    outline: 3px solid color-mix(in oklab, var(--primary) 40%, transparent);
-    outline-offset: 2px;
+    transition: all 0.2s var(--ease-out);
+    gap: 8px;
 }
 
-/* ---------- Forms (fixes dark inputs, makes them beautiful) ---------- */
-label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
-input, select, textarea {
+.button.primary {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.button.primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+}
+
+.button.primary:active {
+    transform: translateY(0);
+}
+
+.button.danger {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border: 1px solid rgba(220, 38, 38, 0.1);
+}
+
+.button.danger:hover {
+    background: #fee2e2;
+}
+
+/* ---------- Table ---------- */
+.table-container {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+}
+
+table {
     width: 100%;
-    background: var(--input-bg);
-    color: var(--input-text);
-    border: 1px solid var(--input-border);
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    outline: none;
-    transition: border-color .15s ease, box-shadow .15s ease, background .2s ease, color .2s ease;
-}
-input::placeholder, textarea::placeholder { color: var(--input-placeholder); }
-input:focus, select:focus, textarea:focus {
-    border-color: var(--input-focus);
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--input-focus) 20%, transparent);
-}
-input, select, textarea { max-width: 100%; }
-
-/* datetime picker contrast */
-input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: none; }
-body.dark-mode input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-    filter: invert(1) saturate(.3) brightness(1.3);
+    border-collapse: collapse;
+    background: var(--panel);
 }
 
-/* ---------- Tables ---------- */
-.table-wrap { overflow-x: auto; }
-.table { width: 100%; border-collapse: collapse; }
-.table th, .table td {
-    padding: 12px 10px;
-    border-bottom: 1px solid var(--line);
-    vertical-align: middle;
-}
-.table th {
+th {
     text-align: left;
-    font-weight: 700;
-    color: var(--muted);
-    font-size: 12.5px;
-    text-transform: none;
+    padding: 16px 20px;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    background: #fcfcfc;
 }
-.table tr:hover td {
-    background: color-mix(in oklab, var(--panel) 85%, var(--panel-2));
+
+td {
+    padding: 16px 20px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-secondary);
 }
-.table .empty-row td {
-    color: var(--muted);
-    text-align: center;
-    padding: 22px 10px;
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background: var(--panel-hover);
 }
 
 /* ---------- Badges ---------- */
 .badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
     font-size: 12px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    background: var(--panel-2);
-    color: var(--text);
-}
-.badge.requested  { border-color: #a3a3a3; background: #f3f4f6; color: #334155; }
-.badge.approved   { border-color: color-mix(in oklab, var(--success) 45%, #000); background: color-mix(in oklab, var(--success) 12%, #fff); color: #065f46; }
-.badge.rejected   { border-color: color-mix(in oklab, var(--danger) 45%, #000);  background: color-mix(in oklab, var(--danger) 10%, #fff);  color: #7f1d1d; }
-.badge.assigned   { border-color: #93c5fd; background: #eef6ff; color: #1e3a8a; }
-body.dark-mode .badge.requested { border-color:#334155;background:#0b1220;color:#c7d2fe; }
-
-/* ---------- Banners ---------- */
-.banner.success {
-    margin: 12px 0; padding: 10px 12px; border-radius: var(--radius-sm);
-    border: 1px solid color-mix(in oklab, var(--success) 45%, #000);
-    background: color-mix(in oklab, var(--success) 16%, #fff);
-    color: #065f46;
-}
-.banner.error {
-    margin: 12px 0; padding: 10px 12px; border-radius: var(--radius-sm);
-    border: 1px solid color-mix(in oklab, var(--danger) 45%, #000);
-    background: color-mix(in oklab, var(--danger) 14%, #fff);
-    color: #7f1d1d;
-}
-/* ---- Remove any bottom line under the top bar ---- */
-.topbar,
-header {
-    border-bottom: 0 !important;
+    font-weight: 600;
+    line-height: 1;
 }
 
-/* if any hr or custom separator slipped in */
-header hr,
-.topbar hr,
-header .sep,
-.topbar .sep {
-    display: none !important;
-    border: 0 !important;
-    height: 0 !important;
+.badge.requested {
+    background: var(--info-bg);
+    color: var(--info-text);
 }
 
-/* make sure the toggle + avatar don't draw lines/shadows */
-.topbar button,
-header button,
-.topbar .avatar,
-header .avatar {
-    border: 0 !important;
-    box-shadow: none !important;
+.badge.approved {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+.badge.rejected {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.badge.assigned {
+    background: #f3e8ff;
+    color: #7e22ce;
+}
+
+/* ---------- Utilities ---------- */
+.text-sm {
+    font-size: 13px;
+}
+
+.text-muted {
+    color: var(--text-tertiary);
+}
+
+.mt-4 {
+    margin-top: 16px;
+}
+
+.mb-4 {
+    margin-bottom: 16px;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ---------- Topbar (Minimal) ---------- */
+.topbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 32px;
     background: transparent;
-}
-
-/* optional: remove text-decoration just in case */
-.topbar a,
-header a,
-.topbar button,
-header button {
-    text-decoration: none !important;
-}
-:root {
-    /* light */
-    --divider: rgba(0, 0, 0, 0.10);
-}
-
-/* If your toggle sets data-theme on html */
-html[data-theme="dark"] {
-    --divider: rgba(255, 255, 255, 0.14);
-}
-
-/* If your toggle adds a .dark class */
-html.dark,
-:root.dark,
-body.dark {
-    --divider: rgba(255, 255, 255, 0.14);
+    /* Blends with body bg */
 }

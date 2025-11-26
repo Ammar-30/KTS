@@ -25,7 +25,8 @@ export async function POST(req: NextRequest) {
         fromTime,
         toTime,
         company,
-        department
+        department,
+        stops
     } = payload;
 
     const redirectBack = (msg: string) => {
@@ -50,6 +51,12 @@ export async function POST(req: NextRequest) {
         return redirectBack("End time must be the same as or after start time");
     }
 
+    // Fetch full user to get department
+    const user = await prisma.user.findUnique({
+        where: { id: s.sub },
+        select: { department: true }
+    });
+
     const trip = await prisma.trip.create({
         data: {
             purpose: String(purpose),
@@ -58,9 +65,10 @@ export async function POST(req: NextRequest) {
             fromTime: from,
             toTime: to,
             company: String(company),
-            department: department ? String(department) : null,
+            department: user?.department ?? null,
             requesterId: s.sub,
-            status: "Requested"
+            status: "Requested",
+            stops: stops ? String(stops) : null
         },
         select: { id: true }
     });

@@ -15,30 +15,42 @@ export default async function ProfilePage(props: { searchParams: Promise<SearchP
     const error = sp.error;
 
     return (
-        <div>
-            {/* Change Password Card */}
-            <div className="card" style={{ maxWidth: 520, margin: "0 auto" }}>
-                <h2>Change Password</h2>
-                <p className="helper" style={{ marginTop: 4 }}>
-                    Signed in as <strong>{(session as any).email}</strong>
-                </p>
+        <div className="shell">
+            <div style={{ maxWidth: 520, margin: "40px auto" }}>
+                <div className="flex-between mb-4">
+                    <h1>Profile Settings</h1>
+                </div>
 
-                {ok && <div className="banner success" style={banner(true)}>Password updated successfully.</div>}
-                {error && <div className="banner error" style={banner(false)}>{error}</div>}
+                {/* Change Password Card */}
+                <div className="card">
+                    <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid var(--border-light)" }}>
+                        <h2>Change Password</h2>
+                        <p className="text-muted" style={{ fontSize: 14 }}>
+                            Update your password associated with <strong>{(session as any).email}</strong>
+                        </p>
+                    </div>
 
-                <ChangePasswordForm />
+                    {ok && (
+                        <div className="banner success" style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: 18, height: 18 }}>
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Password updated successfully.
+                        </div>
+                    )}
+
+                    {error && (
+                        <div className="banner error" style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: 18, height: 18 }}>
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {error}
+                        </div>
+                    )}
+
+                    <ChangePasswordForm />
+                </div>
             </div>
         </div>
     );
-}
-
-function banner(ok: boolean) {
-    return {
-        margin: "12px 0",
-        padding: "10px 12px",
-        borderRadius: 8,
-        border: `1px solid ${ok ? "rgba(16,185,129,.45)" : "rgba(239,68,68,.45)"}`,
-        background: ok ? "rgba(16,185,129,.12)" : "rgba(239,68,68,.12)",
-        color: ok ? "#065f46" : "#7f1d1d",
-    } as const;
 }

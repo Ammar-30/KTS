@@ -12,17 +12,17 @@ export function badgeClass(status: string) {
   // Tiny style hook for status chips
   switch (status) {
     case "Requested":
-      return "badge badge-gray";
+      return "badge requested";
     case "ManagerApproved":
-      return "badge badge-green";
+      return "badge approved";
     case "ManagerRejected":
-      return "badge badge-red";
+      return "badge rejected";
     case "TransportAssigned":
-      return "badge badge-blue";
+      return "badge assigned";
     case "InProgress":
-      return "badge badge-gold";
+      return "badge assigned"; // Reusing assigned for InProgress as gold is not defined
     case "Completed":
-      return "badge badge-dark";
+      return "badge requested"; // Reusing requested for Completed as dark is not defined
     default:
       return "badge";
   }

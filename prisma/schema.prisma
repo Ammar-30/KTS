@@ -19,6 +19,7 @@ model User {
   email        String   @unique
   passwordHash String
   role         String   @default("EMPLOYEE")
+  department   String?
   createdAt    DateTime @default(now())
   trips        Trip[]   @relation("RequesterTrips")
 }
@@ -52,6 +53,7 @@ model Trip {
   toLoc    String
   fromTime DateTime
   toTime   DateTime
+  stops    String? // JSON string for intermediate stops
 
   company    String
   department String?
