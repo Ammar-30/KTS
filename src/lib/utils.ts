@@ -1,5 +1,16 @@
 import { format } from "date-fns";
+import { type ClassValue, clsx } from "clsx";
 
+/**
+ * Merge class names - useful for conditional className merging
+ */
+export function cn(...inputs: ClassValue[]) {
+  return clsx(inputs);
+}
+
+/**
+ * Format date and time: yyyy-MM-dd HH:mm
+ */
 export function fmtDateTime(d: string | Date) {
   try {
     return format(new Date(d), "yyyy-MM-dd HH:mm");
@@ -8,22 +19,24 @@ export function fmtDateTime(d: string | Date) {
   }
 }
 
-export function badgeClass(status: string) {
-  // Tiny style hook for status chips
-  switch (status) {
-    case "Requested":
-      return "badge requested";
-    case "ManagerApproved":
-      return "badge approved";
-    case "ManagerRejected":
-      return "badge rejected";
-    case "TransportAssigned":
-      return "badge assigned";
-    case "InProgress":
-      return "badge assigned"; // Reusing assigned for InProgress as gold is not defined
-    case "Completed":
-      return "badge requested"; // Reusing requested for Completed as dark is not defined
-    default:
-      return "badge";
+/**
+ * Format date only: yyyy-MM-dd
+ */
+export function fmtDate(d: string | Date) {
+  try {
+    return format(new Date(d), "yyyy-MM-dd");
+  } catch {
+    return String(d);
+  }
+}
+
+/**
+ * Format time only: HH:mm
+ */
+export function fmtTime(d: string | Date) {
+  try {
+    return format(new Date(d), "HH:mm");
+  } catch {
+    return String(d);
   }
 }

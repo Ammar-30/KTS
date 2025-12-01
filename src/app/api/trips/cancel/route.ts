@@ -1,51 +1,35 @@
+/**
+ * Cancel trip request
+ * POST /api/trips/cancel
+ */
+
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@lib/db";
-import { getSession } from "@lib/auth";
+import { withErrorHandler } from "@/middleware/error-handler";
+import { requireAuth } from "@/middleware/auth";
+import { validateBody } from "@/middleware/validate";
+import { cancelTripSchema } from "@/validators/trip.validator";
+import { tripService } from "@/services";
+import { logger } from "@/lib/logger";
 
-export const runtime = "nodejs";
+async function handler(req: NextRequest) {
+  const { session } = await requireAuth(req);
+  const input = await validateBody(cancelTripSchema)(req);
 
-export async function POST(req: NextRequest) {
-    const s = await getSession();
-    if (!s) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const trip = await tripService.cancelTrip(input.tripId, session);
 
-    let payload: any = {};
-    const form = await req.formData().catch(async () => null);
-    if (form) {
-        payload = { tripId: String(form.get("tripId") || "") };
-    } else {
-        payload = await req.json().catch(() => ({}));
-    }
-    const { tripId } = payload;
-    if (!tripId) return NextResponse.json({ error: "Missing tripId" }, { status: 400 });
+  logger.info({ tripId: trip.id, userId: session.sub }, "Trip cancelled");
 
-    const trip = await prisma.trip.findUnique({ where: { id: tripId } });
-    if (!trip) return NextResponse.json({ error: "Trip not found" }, { status: 404 });
+  const contentType = req.headers.get("content-type") || "";
+  const wantsJson = contentType.includes("application/json");
 
-    const isOwner = trip.requesterId === s.sub;
-    const isPrivileged = s.role === "ADMIN" || s.role === "TRANSPORT" || s.role === "MANAGER";
-
-    if (!isOwner && !isPrivileged) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    // Block cancel if already assigned or beyond
-    const blocked = ["TransportAssigned", "InProgress", "Completed"];
-    if (blocked.includes(trip.status)) {
-        return NextResponse.json({ error: `Cannot cancel when status is ${trip.status}` }, { status: 409 });
-    }
-
-    await prisma.trip.update({
-        where: { id: trip.id },
-        data: { status: "Cancelled" }
-    });
-
-    // If it was a form post (user clicked button), redirect back to /employee with a toast flag
-    const contentType = req.headers.get("content-type") || "";
-    if (!contentType.includes("application/json")) {
-        const url = new URL(isOwner ? "/employee" : "/transport", req.url);
-        url.searchParams.set("ok", "cancelled");
-        return NextResponse.redirect(url, 303);
-    }
-
+  if (wantsJson) {
     return NextResponse.json({ ok: true });
+  }
+
+  // Redirect
+  const url = new URL(session.role === "EMPLOYEE" ? "/employee" : "/transport", req.url);
+  url.searchParams.set("ok", "cancelled");
+  return NextResponse.redirect(url, 303);
 }
+
+export const POST = withErrorHandler(handler);

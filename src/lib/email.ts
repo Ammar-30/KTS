@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { logger } from "./logger";
 
 /**
  * Read either SMTP_* or EMAIL_* style envs.
@@ -45,8 +46,7 @@ export async function sendAssignmentEmail({
     text?: string;
 }) {
     if (!transporter) {
-        console.log("📧 [Email skipped] Missing SMTP creds");
-        console.log({ HOST, PORT, FROM, to, subject });
+        logger.debug({ HOST, PORT, FROM, to, subject }, "Email skipped - missing SMTP credentials");
         return;
     }
 
@@ -58,8 +58,8 @@ export async function sendAssignmentEmail({
             html,
             text,
         });
-        console.log("✅ Email sent:", info.messageId, "→", to);
+        logger.info({ messageId: info.messageId, to }, "Email sent successfully");
     } catch (err) {
-        console.error("❌ Email send failed:", err);
+        logger.error({ error: err, to, subject }, "Email send failed");
     }
 }

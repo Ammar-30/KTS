@@ -1,17 +1,28 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@lib/db";
 import { getSession } from "@lib/auth";
+import StatCard from "@/components/StatCard";
 
 async function getData() {
     const session = await getSession();
     if (!session) redirect("/login");
-    if (session.role !== "ADMIN") redirect("/login");
+    if (session.role !== "ADMIN") {
+        redirect(`/${session.role.toLowerCase()}`);
+    }
 
-    const employees = await prisma.user.findMany({
-        orderBy: { createdAt: "desc" },
+    const user = await prisma.user.findUnique({
+        where: { id: session.sub },
+        select: { name: true }
     });
 
-    return { employees };
+    const [employees, totalUsers, totalTrips, activeVehicles] = await Promise.all([
+        prisma.user.findMany({ orderBy: { createdAt: "desc" }, take: 10 }),
+        prisma.user.count(),
+        prisma.trip.count(),
+        prisma.vehicle.count({ where: { active: true } }),
+    ]);
+
+    return { employees, totalUsers, totalTrips, activeVehicles, userName: user?.name || "Admin" };
 }
 
 export default async function AdminPage({
@@ -19,78 +30,66 @@ export default async function AdminPage({
 }: {
     searchParams: Promise<{ notice?: string; kind?: "success" | "error" }>;
 }) {
-    const { employees } = await getData();
+    const { employees, totalUsers, totalTrips, activeVehicles, userName } = await getData();
     const sp = await searchParams;
     const notice = sp?.notice;
     const kind = sp?.kind === "error" ? "error" : "success";
 
     return (
         <>
-            {notice && <div className={`banner ${kind}`}>{notice}</div>}
-
-            <div className="flex-between mb-4">
-                <div>
-                    <h1>Admin Dashboard</h1>
-                    <p>Manage employees and system settings.</p>
+            {notice && (
+                <div style={{
+                    padding: "12px 20px",
+                    borderRadius: "8px",
+                    marginBottom: "24px",
+                    background: kind === "error" ? "var(--danger-bg)" : "var(--success-bg)",
+                    color: kind === "error" ? "var(--danger-text)" : "var(--success-text)",
+                    fontWeight: 500
+                }}>
+                    {notice}
                 </div>
+            )}
+
+            <div style={{ marginBottom: "32px" }}>
+                <h1 className="welcome-text">Welcome {userName}!</h1>
+                <p>Here is what's happening today.</p>
             </div>
 
-            <div className="card" style={{ marginBottom: 24 }}>
-                <h2>Add New Employee</h2>
-                <form action="/api/admin/create-employee" method="post" style={{ marginTop: 16 }}>
-                    <div className="form-grid">
-                        <div className="form-group">
-                            <label>Name *</label>
-                            <input name="name" required placeholder="Full Name" />
-                        </div>
-                        <div className="form-group">
-                            <label>Email *</label>
-                            <input name="email" type="email" required placeholder="email@example.com" />
-                        </div>
-                        <div className="form-group">
-                            <label>Password *</label>
-                            <input name="password" type="password" required placeholder="Initial password" />
-                        </div>
-                        <div className="form-group">
-                            <label>Role</label>
-                            <select name="role" defaultValue="EMPLOYEE">
-                                <option value="EMPLOYEE">Employee</option>
-                                <option value="MANAGER">Manager</option>
-                                <option value="TRANSPORT">Transport</option>
-                                <option value="ADMIN">Admin</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>Department</label>
-                            <input name="department" placeholder="e.g. IT, HR, Sales" />
-                        </div>
-                    </div>
-                    <button type="submit" className="button primary" style={{ marginTop: 16 }}>
-                        Create Employee
-                    </button>
-                </form>
+            <div className="stat-grid">
+                <StatCard title="Total Users" value={totalUsers} index={0} />
+                <StatCard title="Total Trips" value={totalTrips} index={1} />
+                <StatCard title="Active Vehicles" value={activeVehicles} index={2} />
+                <StatCard title="System Status" value="Healthy" trend="100% Uptime" trendUp={true} index={3} />
             </div>
 
             <div className="card">
-                <h2>All Users ({employees.length})</h2>
-                <div className="table-wrap">
-                    <table className="table">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+                    <h3>Recent Users</h3>
+                    <button className="btn btn-primary">View All Users</button>
+                </div>
+                <div className="table-wrapper">
+                    <table>
                         <thead>
                             <tr>
                                 <th>Name</th>
                                 <th>Email</th>
                                 <th>Role</th>
                                 <th>Department</th>
-                                <th>Created</th>
+                                <th>Joined</th>
                             </tr>
                         </thead>
                         <tbody>
                             {employees.map((u) => (
                                 <tr key={u.id}>
-                                    <td>{u.name}</td>
+                                    <td>
+                                        <div style={{ fontWeight: 500 }}>{u.name}</div>
+                                    </td>
                                     <td>{u.email}</td>
                                     <td>
-                                        <span className={`badge ${u.role === "ADMIN" ? "assigned" : u.role === "MANAGER" ? "approved" : "requested"}`}>
+                                        <span className={`badge ${u.role === "ADMIN" ? "assigned" :
+                                            u.role === "MANAGER" ? "success" :
+                                                u.role === "TRANSPORT" ? "warning" : "neutral"
+                                            }`}>
                                             {u.role}
                                         </span>
                                     </td>

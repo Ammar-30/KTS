@@ -22,10 +22,10 @@ export default function ChangePasswordForm() {
             />
 
             <div style={{ height: 16 }} />
-            <button type="submit" className="button primary" style={{ width: "100%", justifyContent: "center" }}>
+            <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>
                 Update Password
             </button>
-            <p className="helper" style={{ marginTop: 16, textAlign: "center", fontSize: 13 }}>
+            <p style={{ marginTop: 16, textAlign: "center", fontSize: 13, color: "var(--text-tertiary)" }}>
                 Minimum 8 characters, include at least one letter and one number.
             </p>
         </form>

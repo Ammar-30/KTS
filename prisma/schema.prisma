@@ -21,7 +21,13 @@ model User {
   role         String   @default("EMPLOYEE")
   department   String?
   createdAt    DateTime @default(now())
-  trips        Trip[]   @relation("RequesterTrips")
+  trips             Trip[]            @relation("RequesterTrips")
+  entitledVehicles  EntitledVehicle[] @relation("UserEntitledVehicles")
+  maintenanceRequests MaintenanceRequest[]
+  notifications     Notification[]
+
+  @@index([role])
+  @@index([email])
 }
 
 model Driver {
@@ -33,6 +39,8 @@ model Driver {
   createdAt DateTime @default(now())
 
   trips Trip[] @relation("DriverTrips")
+
+  @@index([active])
 }
 
 model Vehicle {
@@ -44,6 +52,9 @@ model Vehicle {
   createdAt DateTime @default(now())
 
   trips Trip[] @relation("VehicleTrips")
+  maintenanceRequests MaintenanceRequest[]
+
+  @@index([active])
 }
 
 model Trip {
@@ -84,4 +95,100 @@ model Trip {
 
   // mileage tracking
   startMileage Int?
+  endMileage   Int? // End mileage for calculating distance traveled
+
+  // vehicle category: "FLEET" | "PERSONAL" | "ENTITLED"
+  vehicleCategory String @default("FLEET")
+  personalVehicleDetails String? // Details when using personal vehicle
+  
+  entitledVehicle   EntitledVehicle? @relation("TripEntitledVehicle", fields: [entitledVehicleId], references: [id])
+  entitledVehicleId String?
+
+  passengerNames String? // Comma-separated or JSON list of passenger names
+
+  tadaRequests TadaRequest[]
+
+  @@index([status])
+  @@index([requesterId])
+  @@index([createdAt])
+  @@index([driverId, status])
+  @@index([vehicleId, status])
+  @@index([fromTime, toTime])
+}
+
+model EntitledVehicle {
+  id            String   @id @default(cuid())
+  vehicleNumber String   @unique // e.g. LEA-1234 - must be unique across all entitled vehicles
+  vehicleType   String?  // e.g. Sedan, SUV
+  assignedTo    User     @relation("UserEntitledVehicles", fields: [userId], references: [id])
+  userId        String
+  assignedAt    DateTime @default(now())
+  active        Boolean  @default(true)
+  
+  trips Trip[] @relation("TripEntitledVehicle")
+  maintenanceRequests MaintenanceRequest[]
+
+  @@index([userId])
+  @@index([active])
+}
+
+model TadaRequest {
+  id              String   @id @default(cuid())
+  amount          Float
+  description     String?
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  rejectionReason String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  trip   Trip   @relation(fields: [tripId], references: [id])
+  tripId String @unique // One TADA request per trip
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model MaintenanceRequest {
+  id              String   @id @default(cuid())
+  description     String
+  status          String   @default("REQUESTED") // REQUESTED, APPROVED, REJECTED, IN_PROGRESS, COMPLETED
+  rejectionReason String?
+  cost            Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  completedAt     DateTime?
+
+  entitledVehicle   EntitledVehicle? @relation(fields: [entitledVehicleId], references: [id])
+  entitledVehicleId String?
+
+  vehicle   Vehicle? @relation(fields: [vehicleId], references: [id])
+  vehicleId String?
+
+  requester   User   @relation(fields: [requesterId], references: [id])
+  requesterId String
+
+  approvedById String?
+
+  @@index([status])
+  @@index([requesterId])
+  @@index([entitledVehicleId])
+  @@index([vehicleId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String   // TRIP_REQUEST, TRIP_APPROVED, TRIP_REJECTED, TADA_REQUEST, TADA_APPROVED, MAINTENANCE_REQUEST, MAINTENANCE_APPROVED, etc.
+  title     String
+  message   String
+  link      String?  // Optional link to related resource
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@index([createdAt])
 }

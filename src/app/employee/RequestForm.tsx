@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import DateTimePicker from "@/components/DateTimePicker";
 
 // Icons
 const Icons = {
@@ -32,40 +33,24 @@ const Icons = {
     ),
 };
 
-export default function RequestForm({ department }: { department?: string }) {
-    const fromRef = useRef<HTMLInputElement>(null);
-    const toRef = useRef<HTMLInputElement>(null);
+type EntitledVehicle = {
+    id: string;
+    vehicleNumber: string;
+    vehicleType: string | null;
+};
+
+export default function RequestForm({ department, entitledVehicles = [] }: { department?: string, entitledVehicles?: EntitledVehicle[] }) {
+    const [fromTime, setFromTime] = useState<string>("");
+    const [toTime, setToTime] = useState<string>("");
     const [stops, setStops] = useState<string[]>([]);
-
-    // Keep "toTime" min >= "fromTime"
-    useEffect(() => {
-        const fromEl = fromRef.current!;
-        const toEl = toRef.current!;
-
-        const syncMin = () => {
-            if (!fromEl.value) return;
-            toEl.min = fromEl.value;
-            if (toEl.value && toEl.value < fromEl.value) {
-                toEl.value = fromEl.value;
-            }
-        };
-
-        fromEl.addEventListener("change", syncMin);
-        fromEl.addEventListener("input", syncMin);
-        syncMin();
-        return () => {
-            fromEl.removeEventListener("change", syncMin);
-            fromEl.removeEventListener("input", syncMin);
-        };
-    }, []);
+    const [passengers, setPassengers] = useState<string[]>([]);
+    const [category, setCategory] = useState("FLEET");
 
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        const fromEl = fromRef.current!;
-        const toEl = toRef.current!;
-        if (fromEl.value && toEl.value && toEl.value < fromEl.value) {
+        if (fromTime && toTime && toTime < fromTime) {
             e.preventDefault();
-            alert("End time must be the same as or after the start time.");
-            toEl.focus();
+            alert("Return time must be the same as or after the departure time.");
+            return;
         }
     };
 
@@ -77,6 +62,14 @@ export default function RequestForm({ department }: { department?: string }) {
         setStops(newStops);
     };
 
+    const addPassenger = () => setPassengers([...passengers, ""]);
+    const removePassenger = (index: number) => setPassengers(passengers.filter((_, i) => i !== index));
+    const updatePassenger = (index: number, value: string) => {
+        const newPassengers = [...passengers];
+        newPassengers[index] = value;
+        setPassengers(newPassengers);
+    };
+
     return (
         <form action="/api/trips/create" method="post" onSubmit={onSubmit}>
             <input type="hidden" name="stops" value={JSON.stringify(stops)} />
@@ -85,9 +78,126 @@ export default function RequestForm({ department }: { department?: string }) {
                 <label>Purpose of Trip</label>
                 <div className="input-wrapper">
                     <Icons.Purpose />
-                    <input name="purpose" required placeholder="e.g. Client meeting, Site visit..." className="has-icon" />
+                    <input name="purpose" required placeholder="e.g. Client meeting..." className="has-icon" />
                 </div>
             </div>
+
+            <div className="form-group" style={{ marginBottom: 24 }}>
+                <label style={{ marginBottom: 12, display: "block" }}>Passengers Traveling (Optional)</label>
+                {passengers.length === 0 && (
+                    <p style={{ fontSize: "13px", color: "var(--text-tertiary)", marginBottom: 8 }}>
+                        No passengers added. Click "Add Passenger" if you have passengers traveling with you.
+                    </p>
+                )}
+                {passengers.map((name, index) => (
+                    <div key={index} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => updatePassenger(index, e.target.value)}
+                            placeholder={`Passenger ${index + 1} Name`}
+                            style={{ flex: 1, padding: "10px", borderRadius: "6px", border: "1px solid var(--border)" }}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => removePassenger(index)}
+                            style={{
+                                padding: "8px 12px",
+                                borderRadius: "6px",
+                                border: "1px solid var(--danger-border)",
+                                background: "var(--danger-bg)",
+                                color: "var(--danger-text)",
+                                cursor: "pointer"
+                            }}
+                        >
+                            Remove
+                        </button>
+                    </div>
+                ))}
+                <button
+                    type="button"
+                    onClick={addPassenger}
+                    className="button secondary"
+                    style={{ width: "100%", justifyContent: "center", marginTop: 8 }}
+                >
+                    + Add Passenger
+                </button>
+                <input type="hidden" name="passengerNames" value={JSON.stringify(passengers.filter(p => p.trim() !== ""))} />
+            </div>
+
+
+            <div className="form-group" style={{ marginBottom: 24 }}>
+                <label style={{ marginBottom: 12, display: "block" }}>Vehicle Category</label>
+                <div style={{ display: "flex", gap: "24px" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                        <input
+                            type="radio"
+                            name="vehicleCategory"
+                            value="FLEET"
+                            checked={category === "FLEET"}
+                            onChange={(e) => setCategory(e.target.value)}
+                        />
+                        <span>Fleet Vehicle</span>
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                        <input
+                            type="radio"
+                            name="vehicleCategory"
+                            value="PERSONAL"
+                            checked={category === "PERSONAL"}
+                            onChange={(e) => setCategory(e.target.value)}
+                        />
+                        <span>Personal Vehicle</span>
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                        <input
+                            type="radio"
+                            name="vehicleCategory"
+                            value="ENTITLED"
+                            checked={category === "ENTITLED"}
+                            onChange={(e) => setCategory(e.target.value)}
+                        />
+                        <span>Officially Entitled</span>
+                    </label>
+                </div>
+            </div>
+
+            {category === "PERSONAL" && (
+                <div className="form-group" style={{ marginBottom: 24 }}>
+                    <label>Vehicle Details</label>
+                    <div className="input-wrapper">
+                        <input
+                            name="personalVehicleDetails"
+                            required
+                            placeholder="e.g. Honda Civic LEA-1234"
+                            className="input-field"
+                            style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border)" }}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {category === "ENTITLED" && (
+                <div className="form-group" style={{ marginBottom: 24 }}>
+                    <label>Entitled Vehicle</label>
+                    {entitledVehicles.length > 0 ? (
+                        <div className="input-wrapper">
+                            <input
+                                type="text"
+                                value={`${entitledVehicles[0].vehicleNumber} ${entitledVehicles[0].vehicleType ? `(${entitledVehicles[0].vehicleType})` : ""}`}
+                                disabled
+                                className="input-field"
+                                style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border)", background: "var(--bg-body)", color: "var(--text-secondary)" }}
+                            />
+                            <input type="hidden" name="entitledVehicleId" value={entitledVehicles[0].id} />
+                        </div>
+                    ) : (
+                        <p style={{ color: "var(--danger-text)", fontSize: "13px", marginTop: "4px" }}>
+                            No entitled vehicles assigned to you. Please contact admin.
+                        </p>
+                    )}
+                </div>
+            )}
 
             <div className="form-grid">
                 <div className="form-group">
@@ -163,7 +273,19 @@ export default function RequestForm({ department }: { department?: string }) {
                     <label>Departure Time</label>
                     <div className="input-wrapper">
                         <Icons.Calendar />
-                        <input ref={fromRef} name="fromTime" type="datetime-local" required className="has-icon" />
+                        <DateTimePicker
+                            name="fromTime"
+                            value={fromTime}
+                            onChange={(value) => {
+                                setFromTime(value);
+                                // Update toTime min if needed
+                                if (toTime && value > toTime) {
+                                    setToTime(value);
+                                }
+                            }}
+                            required
+                            placeholder="dd/mm/yyyy, --:--"
+                        />
                     </div>
                 </div>
 
@@ -171,7 +293,14 @@ export default function RequestForm({ department }: { department?: string }) {
                     <label>Return Time</label>
                     <div className="input-wrapper">
                         <Icons.Calendar />
-                        <input ref={toRef} name="toTime" type="datetime-local" required className="has-icon" />
+                        <DateTimePicker
+                            name="toTime"
+                            value={toTime}
+                            onChange={setToTime}
+                            min={fromTime || undefined}
+                            required
+                            placeholder="dd/mm/yyyy, --:--"
+                        />
                     </div>
                 </div>
             </div>
@@ -181,7 +310,7 @@ export default function RequestForm({ department }: { department?: string }) {
                     <label>Company</label>
                     <div className="input-wrapper">
                         <Icons.Building />
-                        <select name="company" required className="has-icon">
+                        <select name="company" required className="has-icon" defaultValue="KIPS_PREPS">
                             <option value="KIPS_PREPS">KIPS Preps</option>
                             <option value="TETB">TETB</option>
                             <option value="QUALITY_BRANDS">Quality Brands</option>

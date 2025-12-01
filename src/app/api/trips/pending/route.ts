@@ -1,19 +1,22 @@
-import { NextResponse } from "next/server";
-import { getSession } from "@lib/auth";
-import { prisma } from "@lib/db";
+/**
+ * Get pending trip requests
+ * GET /api/trips/pending
+ */
 
-export async function GET() {
-  const s = await getSession();
-  if (!s) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (s.role !== "MANAGER" && s.role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+import { NextRequest, NextResponse } from "next/server";
+import { withErrorHandler } from "@/middleware/error-handler";
+import { requireAuth } from "@/middleware/auth";
+import { requireManager } from "@/middleware/rbac";
+import { tripRepository } from "@/repositories";
+import { TRIP_STATUS } from "@/lib/constants";
 
-  const items = await prisma.trip.findMany({
-    where: { status: "Requested" },
-    include: { requester: true },
-    orderBy: { createdAt: "asc" }
-  });
+async function handler(req: NextRequest) {
+  const { session } = await requireAuth(req);
+  requireManager(req as any);
+
+  const items = await tripRepository.findByStatus(TRIP_STATUS.REQUESTED);
 
   return NextResponse.json({ items });
 }
+
+export const GET = withErrorHandler(handler);

@@ -2,20 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import ThemeToggle from "@/components/ThemeToggle";
+import UserAvatar from "@/components/UserAvatar";
+import { AnimatedDropdown } from "@/components/animations";
 
 type UserMeta = { name?: string; email?: string; role?: string };
 
 export default function Topbar({ user }: { user?: UserMeta }) {
-    if (!user || (!user.name && !user.email)) return null;
+    if (!user) return null;
+
+    // Use name (should always be available now from session)
+    const displayName = user.name || "User";
 
     const [open, setOpen] = useState(false);
     const router = useRouter();
-
-    const initial =
-        user.name?.trim()?.[0]?.toUpperCase() ??
-        user.email?.trim()?.[0]?.toUpperCase() ??
-        "";
 
     // Close dropdown on outside click
     useEffect(() => {
@@ -32,101 +31,68 @@ export default function Topbar({ user }: { user?: UserMeta }) {
 
     return (
         <div className="topbar" style={{ position: "relative", display: "flex", alignItems: "center" }}>
-            <div style={{ flex: 1 }} />
-
-            {/* Profile Avatar */}
+            {/* Profile Avatar Button */}
             <button
                 id="avatar-btn"
                 onClick={() => setOpen((v) => !v)}
                 aria-label="User menu"
-                title="User menu"
+                title={displayName}
                 style={{
-                    background: "#1f2937",
-                    color: "#fff",
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
+                    background: "transparent",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: "bold",
-                    border: "none",
-                    marginLeft: 8,
-                    cursor: "pointer",
                 }}
             >
-                {initial}
+                <UserAvatar name={displayName} size={40} />
             </button>
 
-            {open && (
-                <div
-                    id="user-dropdown"
-                    style={{
-                        position: "absolute",
-                        top: 56,
-                        right: 24,
-                        background: "var(--panel)",
-                        border: "1px solid var(--line)",
-                        borderRadius: 12,
-                        padding: 12,
-                        width: 260,
-                        boxShadow: "var(--shadow-1)",
-                        zIndex: 100,
-                    }}
-                >
-                    {/* User info */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                        <div
-                            style={{
-                                background: "#1f2937",
-                                color: "#fff",
-                                width: 28,
-                                height: 28,
-                                borderRadius: "50%",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontWeight: 700,
+            <AnimatedDropdown
+                isOpen={open}
+                style={{
+                    position: "absolute",
+                    top: 56,
+                    right: 0,
+                    background: "var(--bg-panel)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "var(--radius-lg)",
+                    padding: 16,
+                    width: 280,
+                    boxShadow: "var(--shadow-xl)",
+                    zIndex: 9999,
+                }}
+            >
+                <div id="user-dropdown">
+                    {/* User info with Avatar and Name */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                        <UserAvatar name={displayName} size={48} />
+                        <div style={{ flex: 1 }}>
+                            <div style={{
+                                fontWeight: 600,
+                                fontSize: 15,
+                                color: "var(--text-main)",
+                                marginBottom: 2
+                            }}>
+                                {displayName}
+                            </div>
+                            <div style={{
                                 fontSize: 13,
-                            }}
-                        >
-                            {initial}
+                                color: "var(--text-tertiary)",
+                                textTransform: "capitalize"
+                            }}>
+                                {user.role?.toLowerCase()}
+                            </div>
                         </div>
-                        <div style={{ color: "var(--text)", fontSize: 13, opacity: 0.9 }}>{user.email}</div>
                     </div>
 
-                    <hr style={{ borderColor: "var(--line)", margin: "8px 0" }} />
+                    <hr style={{
+                        border: "none",
+                        borderTop: "1px solid var(--border)",
+                        margin: "12px 0"
+                    }} />
 
-                    {/* Admin Dashboard Link */}
-                    {user.role === "ADMIN" && (
-                        <>
-                            <button
-                                onClick={() => {
-                                    router.push("/admin");
-                                    setOpen(false);
-                                }}
-                                style={{
-                                    width: "100%",
-                                    padding: "8px 12px",
-                                    color: "var(--text)",
-                                    background: "transparent",
-                                    border: "none",
-                                    textAlign: "left",
-                                    cursor: "pointer",
-                                    borderRadius: 8,
-                                    fontSize: 14,
-                                }}
-                            >
-                                Admin Dashboard
-                            </button>
-                            <hr style={{ borderColor: "var(--line)", margin: "8px 0" }} />
-                        </>
-                    )}
-
-                    {/* Dark Mode Toggle INSIDE dropdown */}
-                    <div style={{ marginBottom: 10 }}>
-                        <ThemeToggle />
-                    </div>
 
                     {/* Change Password */}
                     <button
@@ -136,40 +102,53 @@ export default function Topbar({ user }: { user?: UserMeta }) {
                         }}
                         style={{
                             width: "100%",
-                            padding: "8px 12px",
-                            color: "var(--text)",
+                            padding: "10px 12px",
+                            color: "var(--text-secondary)",
                             background: "transparent",
                             border: "none",
                             textAlign: "left",
                             cursor: "pointer",
-                            borderRadius: 8,
+                            borderRadius: "var(--radius-md)",
                             fontSize: 14,
+                            fontWeight: 500,
+                            transition: "all 0.2s",
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = "var(--bg-body)";
+                            e.currentTarget.style.color = "var(--primary)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = "transparent";
+                            e.currentTarget.style.color = "var(--text-secondary)";
                         }}
                     >
-                        Change Password
+                        🔒 Change Password
                     </button>
 
+                    <hr style={{
+                        border: "none",
+                        borderTop: "1px solid var(--border)",
+                        margin: "12px 0"
+                    }} />
+
                     {/* Logout */}
-                    <form action="/api/auth/logout" method="post" style={{ marginTop: 8 }}>
+                    <form action="/api/auth/logout" method="post">
                         <button
                             type="submit"
                             className="button danger"
                             style={{
                                 width: "100%",
-                                background: "#ef4444",
-                                color: "white",
-                                border: "none",
-                                padding: "8px 0",
-                                borderRadius: 6,
-                                cursor: "pointer",
+                                padding: "10px 16px",
+                                borderRadius: "var(--radius-md)",
                                 fontSize: 14,
+                                fontWeight: 600,
                             }}
                         >
                             Logout
                         </button>
                     </form>
                 </div>
-            )}
+            </AnimatedDropdown>
         </div>
     );
 }
