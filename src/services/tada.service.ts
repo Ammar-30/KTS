@@ -18,7 +18,6 @@ export class TadaService {
         // Verify trip belongs to user
         const trip = await tx.trip.findUnique({
           where: { id: input.tripId },
-          include: { tadaRequests: true },
         });
 
         if (!trip || trip.requesterId !== requesterId) {
@@ -31,15 +30,11 @@ export class TadaService {
           throw new ConflictError("Trip must be approved or completed to claim allowance");
         }
 
-        // Check if TADA already exists
-        if (trip.tadaRequests.length > 0) {
-          throw new ConflictError("Claim already exists for this trip");
-        }
-
-        // Create TADA request
+        // Create TADA request (now allowing multiple claims per trip)
         const tadaRequest = await tx.tadaRequest.create({
           data: {
             tripId: input.tripId,
+            claimType: input.claimType,
             amount: input.amount,
             description: input.description,
             status: TADA_STATUS.PENDING,
@@ -59,7 +54,7 @@ export class TadaService {
           },
         });
 
-        return { tadaRequest, tripPurpose: trip.purpose || "Trip", amount: input.amount };
+        return { tadaRequest, tripPurpose: trip.purpose || "Trip", amount: input.amount, claimType: input.claimType };
       },
       {
         maxWait: 20000,
@@ -73,7 +68,7 @@ export class TadaService {
         role: "MANAGER",
         type: "TADA_REQUEST",
         title: "New Allowance Request",
-        message: `A new allowance claim of PKR ${result.amount} has been submitted for trip: ${result.tripPurpose}`,
+        message: `A new ${result.claimType} claim of PKR ${result.amount} has been submitted for trip: ${result.tripPurpose}`,
         link: "/manager/allowances",
       });
     } catch (error) {
@@ -81,6 +76,71 @@ export class TadaService {
     }
 
     return result.tadaRequest;
+  }
+
+  async createTadaBatch(input: { tripId: string, claims: Array<{ claimType: string, amount: number, description: string }> }, requesterId: string) {
+    const result = await prisma.$transaction(
+      async (tx) => {
+        // Verify trip belongs to user
+        const trip = await tx.trip.findUnique({
+          where: { id: input.tripId },
+        });
+
+        if (!trip || trip.requesterId !== requesterId) {
+          throw new NotFoundError("Trip not found or access denied");
+        }
+
+        // Validate trip status
+        const allowedStatuses = ["ManagerApproved", "TransportAssigned", "InProgress", "Completed"];
+        if (!allowedStatuses.includes(trip.status)) {
+          throw new ConflictError("Trip must be approved or completed to claim allowance");
+        }
+
+        // Create all TADA requests
+        const createdClaims = [];
+        let totalAmount = 0;
+
+        for (const claim of input.claims) {
+          const tadaRequest = await tx.tadaRequest.create({
+            data: {
+              tripId: input.tripId,
+              claimType: claim.claimType,
+              amount: claim.amount,
+              description: claim.description,
+              status: TADA_STATUS.PENDING,
+            },
+          });
+          createdClaims.push(tadaRequest);
+          totalAmount += claim.amount;
+        }
+
+        return {
+          count: createdClaims.length,
+          claims: createdClaims,
+          tripPurpose: trip.purpose || "Trip",
+          totalAmount
+        };
+      },
+      {
+        maxWait: 20000,
+        timeout: 30000,
+      }
+    );
+
+    // Notify managers (outside transaction)
+    try {
+      await createNotificationsForRole({
+        role: "MANAGER",
+        type: "TADA_REQUEST",
+        title: "New Allowance Claims",
+        message: `${result.count} new claims totaling PKR ${result.totalAmount} have been submitted for trip: ${result.tripPurpose}`,
+        link: "/manager/allowances",
+      });
+    } catch (error) {
+      logger.error({ error, tripId: input.tripId }, "Failed to notify managers");
+    }
+
+    return result;
   }
 
   async approveTada(input: ApproveTadaInput, session: SessionPayload) {

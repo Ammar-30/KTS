@@ -40,8 +40,14 @@ export const completeMaintenanceSchema = z.object({
   cost: z.coerce.number().nonnegative().max(10000000).optional().nullable(), // Max 10 million
 });
 
+export const reportIssueSchema = z.object({
+  requestId: z.string().cuid(),
+  issueDescription: sanitizedString,
+});
+
 export type CreateMaintenanceInput = z.infer<typeof createMaintenanceSchema>;
 export type CreateFleetMaintenanceInput = z.infer<typeof createFleetMaintenanceSchema>;
 export type ApproveMaintenanceInput = z.infer<typeof approveMaintenanceSchema>;
 export type CompleteMaintenanceInput = z.infer<typeof completeMaintenanceSchema>;
+export type ReportIssueInput = z.infer<typeof reportIssueSchema>;
 

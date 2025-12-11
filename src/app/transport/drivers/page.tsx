@@ -8,6 +8,8 @@ import { getSession } from "@lib/auth";
 import StatCard from "@/components/StatCard";
 import UserAvatar from "@/components/UserAvatar";
 import { fmtDateTime } from "@lib/utils";
+import AddDriverModal from "./AddDriverModal";
+import ManageDriverModal from "./ManageDriverModal";
 
 async function getData() {
     const session = await getSession();
@@ -97,29 +99,7 @@ export default async function DriversPage({
                 <div className="flex-between mb-4" style={{ alignItems: "center", borderBottom: "1px solid var(--border-light)", paddingBottom: "16px" }}>
                     <h2 style={{ margin: 0 }}>Drivers Directory</h2>
 
-                    <details className="dropdown-right" style={{ position: "relative" }}>
-                        <summary className="btn btn-primary" style={{ listStyle: "none", cursor: "pointer" }}>
-                            + Add Driver
-                        </summary>
-                        <div className="dropdown-menu dropdown-content" style={{ width: "400px" }}>
-                            <h3 style={{ marginTop: 0, marginBottom: "16px" }}>Add New Driver</h3>
-                            <form action="/api/drivers/create" method="post">
-                                <div className="form-group mb-3">
-                                    <label style={{ display: "block", marginBottom: "6px", fontWeight: 500, fontSize: "13px" }}>Full Name *</label>
-                                    <input name="name" required placeholder="Driver name" className="input-field" style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                </div>
-                                <div className="form-group mb-3">
-                                    <label style={{ display: "block", marginBottom: "6px", fontWeight: 500, fontSize: "13px" }}>Phone Number</label>
-                                    <input name="phone" placeholder="0300-1234567" className="input-field" style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                </div>
-                                <div className="form-group mb-4">
-                                    <label style={{ display: "block", marginBottom: "6px", fontWeight: 500, fontSize: "13px" }}>License Number</label>
-                                    <input name="licenseNo" placeholder="License number" className="input-field" style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                </div>
-                                <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>Add Driver</button>
-                            </form>
-                        </div>
-                    </details>
+                    <AddDriverModal />
                 </div>
 
                 <div className="table-wrapper">
@@ -184,39 +164,7 @@ export default async function DriversPage({
                                         )}
                                     </td>
                                     <td className="actions" style={{ padding: "16px", borderBottom: "1px solid var(--border-light)", textAlign: "right" }}>
-                                        <details style={{ position: "relative", display: "inline-block" }}>
-                                            <summary className="btn btn-secondary" style={{ padding: "8px 16px", fontSize: "13px", cursor: "pointer", listStyle: "none", whiteSpace: "nowrap" }}>
-                                                Manage ▾
-                                            </summary>
-                                            <div className="dropdown-menu dropdown-right" style={{ width: "280px", padding: "16px", top: "100%", marginTop: 8 }}>
-                                                <h4 style={{ margin: "0 0 12px 0", fontSize: "14px" }}>Edit Driver</h4>
-                                                <form action="/api/drivers/update" method="post">
-                                                    <input type="hidden" name="id" value={d.id} />
-                                                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                                                        <input name="name" defaultValue={d.name} placeholder="Name" style={{ padding: "8px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                                        <input name="phone" defaultValue={d.phone || ""} placeholder="Phone" style={{ padding: "8px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                                        <input name="licenseNo" defaultValue={d.licenseNo || ""} placeholder="License No" style={{ padding: "8px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                                        <select name="active" defaultValue={d.active ? "true" : "false"} style={{ padding: "8px", borderRadius: "6px", border: "1px solid var(--border)" }}>
-                                                            <option value="true">Active</option>
-                                                            <option value="false">Inactive</option>
-                                                        </select>
-                                                        <button type="submit" className="btn btn-primary" style={{ marginTop: "4px" }}>Save Changes</button>
-                                                    </div>
-                                                </form>
-
-                                                {d.active && (
-                                                    <>
-                                                        <hr style={{ margin: "12px 0", border: "none", borderTop: "1px solid var(--border)" }} />
-                                                        <form action="/api/drivers/delete" method="post">
-                                                            <input type="hidden" name="id" value={d.id} />
-                                                            <button type="submit" className="btn" style={{ width: "100%", background: "var(--danger-bg)", color: "var(--danger-text)", border: "none" }}>
-                                                                Deactivate Driver
-                                                            </button>
-                                                        </form>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </details>
+                                        <ManageDriverModal driver={d} />
                                     </td>
                                 </tr>
                             ))}

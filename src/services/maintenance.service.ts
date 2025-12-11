@@ -9,12 +9,13 @@ import {
   isValidTransition,
   MAINTENANCE_STATUS_TRANSITIONS,
 } from "@/lib/constants";
-import { NotFoundError, StateTransitionError, ForbiddenError } from "@/lib/errors";
+import { NotFoundError, StateTransitionError, ForbiddenError, ValidationError } from "@/lib/errors";
 import {
   CreateMaintenanceInput,
   CreateFleetMaintenanceInput,
   ApproveMaintenanceInput,
   CompleteMaintenanceInput,
+  ReportIssueInput,
 } from "@/validators/maintenance.validator";
 import { createNotificationsForRole, createNotification } from "@/lib/notifications";
 import { logger } from "@/lib/logger";
@@ -410,7 +411,114 @@ export class MaintenanceService {
       }
     );
   }
+
+  async reportIssue(input: ReportIssueInput, session: SessionPayload) {
+    const result = await prisma.$transaction(
+      async (tx) => {
+        const request = await tx.maintenanceRequest.findUnique({
+          where: { id: input.requestId },
+          include: {
+            entitledVehicle: {
+              include: {
+                assignedTo: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+            vehicle: true,
+            requester: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        });
+
+        if (!request) {
+          throw new NotFoundError("Maintenance request");
+        }
+
+        // Only allow the requester or admin to report issues
+        if (request.requesterId !== session.sub && session.role !== "ADMIN") {
+          throw new ForbiddenError("Not authorized to report issue");
+        }
+
+        // Only allow reporting issues on completed maintenance
+        if (request.status !== MAINTENANCE_STATUS.COMPLETED) {
+          throw new StateTransitionError(request.status, "ISSUE_REPORTED");
+        }
+
+        const updatedRequest = await tx.maintenanceRequest.update({
+          where: { id: input.requestId },
+          data: {
+            issueReported: true,
+            issueDescription: input.issueDescription,
+            issueReportedAt: new Date(),
+          },
+          include: {
+            entitledVehicle: {
+              include: {
+                assignedTo: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+            vehicle: true,
+            requester: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        });
+
+        const vehicleNumber = updatedRequest.entitledVehicle?.vehicleNumber || updatedRequest.vehicle?.number || "Unknown";
+        const isFleetVehicle = !!updatedRequest.vehicleId;
+
+        return { updatedRequest, vehicleNumber, isFleetVehicle };
+      },
+      {
+        maxWait: 20000,
+        timeout: 30000,
+      }
+    );
+
+    // Notify TRANSPORT and MANAGER roles (outside transaction)
+    try {
+      await Promise.all([
+        createNotificationsForRole({
+          role: "TRANSPORT",
+          type: "MAINTENANCE_ISSUE_REPORTED",
+          title: "Issue Reported on Maintenance",
+          message: `An issue has been reported for vehicle ${result.vehicleNumber}. Please review and address.`,
+          link: "/transport/maintenance",
+        }),
+        createNotificationsForRole({
+          role: "MANAGER",
+          type: "MAINTENANCE_ISSUE_REPORTED",
+          title: "Maintenance Issue Reported",
+          message: `An issue has been reported for vehicle ${result.vehicleNumber}.`,
+          link: "/manager/maintenance",
+        }),
+      ]);
+    } catch (error) {
+      logger.error({ error, requestId: result.updatedRequest.id }, "Failed to send notifications");
+    }
+
+    return result.updatedRequest;
+  }
 }
 
 export const maintenanceService = new MaintenanceService();
-

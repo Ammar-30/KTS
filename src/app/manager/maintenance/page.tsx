@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@lib/db";
 import { getSession } from "@lib/auth";
 import { fmtDateTime } from "@lib/utils";
+import MaintenanceActions from "./MaintenanceActions";
 
 async function getData() {
     const session = await getSession();
@@ -48,7 +49,7 @@ export default async function ManagerMaintenancePage({ searchParams }: { searchP
                 </div>
             )}
 
-            <div className="card">
+            <div className="card" style={{ transform: "none", transition: "none" }}>
                 <h2>Pending Maintenance Requests</h2>
                 <div className="table-wrapper" style={{ marginTop: 20 }}>
                     <table>
@@ -66,7 +67,7 @@ export default async function ManagerMaintenancePage({ searchParams }: { searchP
                                 const isFleetVehicle = !!m.vehicleId;
                                 const vehicleNumber = m.entitledVehicle?.vehicleNumber || m.vehicle?.number || "Unknown";
                                 const vehicleType = m.entitledVehicle?.vehicleType || m.vehicle?.type || null;
-                                
+
                                 return (
                                     <tr key={m.id}>
                                         <td>
@@ -88,73 +89,8 @@ export default async function ManagerMaintenancePage({ searchParams }: { searchP
                                         </td>
                                         <td style={{ maxWidth: 350 }}>{m.description}</td>
                                         <td>{fmtDateTime(m.createdAt)}</td>
-                                        <td>
-                                            <form action="/api/maintenance/approve" method="post" style={{ display: "flex", gap: 8, alignItems: "start" }}>
-                                                <input type="hidden" name="requestId" value={m.id} />
-                                                <button
-                                                    name="decision"
-                                                    value="approve"
-                                                    className="btn btn-primary"
-                                                    style={{ padding: "6px 12px", fontSize: 13 }}
-                                                >
-                                                    Approve
-                                                </button>
-                                                <details style={{ position: "relative" }}>
-                                                    <summary style={{
-                                                        cursor: "pointer",
-                                                        listStyle: "none",
-                                                        padding: "6px 12px",
-                                                        fontSize: "13px"
-                                                    }} className="btn btn-secondary">
-                                                        Reject
-                                                    </summary>
-                                                    <div style={{
-                                                        width: 300,
-                                                        position: "absolute",
-                                                        right: 0,
-                                                        left: "auto",
-                                                        top: "100%",
-                                                        marginTop: 4,
-                                                        zIndex: 50,
-                                                        background: "var(--bg-card)",
-                                                        boxShadow: "var(--shadow-lg)",
-                                                        borderRadius: "8px",
-                                                        border: "1px solid var(--border)",
-                                                        padding: "16px"
-                                                    }}>
-                                                        <label style={{ display: "block", marginBottom: 8, fontSize: 13, fontWeight: 600 }}>
-                                                            Rejection Reason
-                                                        </label>
-                                                        <textarea
-                                                            name="rejectionReason"
-                                                            rows={3}
-                                                            placeholder="e.g. Not urgent, can wait..."
-                                                            className="input-field"
-                                                            style={{
-                                                                width: "100%",
-                                                                marginBottom: 12,
-                                                                fontSize: "13px"
-                                                            }}
-                                                        />
-                                                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                                                            <button
-                                                                name="decision"
-                                                                value="reject"
-                                                                type="submit"
-                                                                className="btn"
-                                                                style={{
-                                                                    background: "var(--danger-bg)",
-                                                                    color: "var(--danger-text)",
-                                                                    fontSize: "13px",
-                                                                    padding: "6px 12px"
-                                                                }}
-                                                            >
-                                                                Confirm Rejection
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </details>
-                                            </form>
+                                        <td className="actions">
+                                            <MaintenanceActions requestId={m.id} />
                                         </td>
                                     </tr>
                                 );

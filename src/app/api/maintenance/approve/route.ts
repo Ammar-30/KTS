@@ -26,10 +26,11 @@ async function handler(req: NextRequest) {
   );
 
   const msg = input.decision === "approve" ? "Maintenance request approved" : "Maintenance request rejected";
-  const url = new URL("/manager/maintenance", req.url);
-  url.searchParams.set("notice", msg);
-  url.searchParams.set("kind", "success");
-  return NextResponse.redirect(url, 303);
+
+  return NextResponse.json({
+    success: true,
+    message: msg
+  });
 }
 
 export const POST = withErrorHandler(handler);

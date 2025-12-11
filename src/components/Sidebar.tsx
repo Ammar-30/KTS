@@ -28,6 +28,7 @@ export default function Sidebar({ userRole, userName }: SidebarProps) {
         { label: "Trip Management", href: "/admin/trips", roles: ["ADMIN"] },
         { label: "TADA Management", href: "/admin/tada", roles: ["ADMIN"] },
         { label: "Entitled Vehicles", href: "/admin/entitled-vehicles", roles: ["ADMIN"] },
+        { label: "Vehicles", href: "/admin/vehicles", roles: ["ADMIN"] },
         { label: "Maintenance", href: "/admin/maintenance", roles: ["ADMIN"] },
         { label: "Manage Fleet", href: "/transport/fleet", roles: ["TRANSPORT"] },
         { label: "Manage Drivers", href: "/transport/drivers", roles: ["TRANSPORT"] },

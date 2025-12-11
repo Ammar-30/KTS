@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function LoginForm() {
     const [email, setEmail] = useState("");
@@ -51,26 +52,40 @@ export default function LoginForm() {
     return (
         <div className="login-container">
             <div className="login-card">
+                {/* Logo Section */}
                 <div style={{ textAlign: "center", marginBottom: 40 }}>
                     <div style={{
-                        width: 64,
-                        height: 64,
-                        background: "var(--primary-gradient)",
-                        borderRadius: 20,
-                        margin: "0 auto 24px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        color: "white",
-                        boxShadow: "0 12px 30px rgba(79, 70, 229, 0.3)",
-                        transform: "rotate(-5deg)"
+                        marginBottom: 24
                     }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: 32, height: 32, transform: "rotate(5deg)" }}>
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
+                        <Image
+                            src="/Kips_Logo.png"
+                            alt="KIPS Logo"
+                            width={80}
+                            height={80}
+                            priority
+                            style={{
+                                objectFit: "contain",
+                                filter: "drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1))"
+                            }}
+                        />
                     </div>
-                    <h1 style={{ fontSize: 28, marginBottom: 8 }}>Welcome Back</h1>
-                    <p className="text-muted">Sign in to access your dashboard</p>
+                    <h1 style={{
+                        fontSize: 32,
+                        marginBottom: 8,
+                        fontWeight: 700,
+                        background: "var(--primary-gradient)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text"
+                    }}>
+                        KIPS Transport
+                    </h1>
+                    <p className="text-muted" style={{ fontSize: 15 }}>
+                        Sign in to access your dashboard
+                    </p>
                 </div>
 
                 <form onSubmit={onSubmit}>
@@ -85,8 +100,9 @@ export default function LoginForm() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 type="email"
                                 required
-                                placeholder="name@company.com"
+                                placeholder="name@kips.edu.pk"
                                 className="has-icon"
+                                autoComplete="email"
                             />
                         </div>
                     </div>
@@ -104,20 +120,43 @@ export default function LoginForm() {
                                 required
                                 placeholder="••••••••"
                                 className="has-icon"
+                                autoComplete="current-password"
                             />
                         </div>
                     </div>
 
                     {error && (
-                        <div className="badge danger" style={{ width: "100%", padding: "12px", marginBottom: 24, justifyContent: "center", borderRadius: "12px" }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: 16, height: 16, marginRight: 8 }}>
+                        <div style={{
+                            width: "100%",
+                            padding: "12px 16px",
+                            marginBottom: 24,
+                            borderRadius: "12px",
+                            background: "var(--danger-bg)",
+                            border: "1px solid var(--danger-border)",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8
+                        }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: 20, height: 20, color: "var(--danger-text)", flexShrink: 0 }}>
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            {error}
+                            <span style={{ color: "var(--danger-text)", fontSize: 14, fontWeight: 500 }}>
+                                {error}
+                            </span>
                         </div>
                     )}
 
-                    <button className="button primary" style={{ width: "100%", height: "48px", fontSize: "16px" }} disabled={loading}>
+                    <button
+                        className="button primary"
+                        style={{
+                            width: "100%",
+                            height: "52px",
+                            fontSize: "16px",
+                            fontWeight: 600,
+                            marginTop: 8
+                        }}
+                        disabled={loading}
+                    >
                         {loading ? (
                             <>
                                 <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style={{ width: 20, height: 20, marginRight: 8 }}>
@@ -136,6 +175,22 @@ export default function LoginForm() {
                         )}
                     </button>
                 </form>
+
+                {/* Footer */}
+                <div style={{
+                    marginTop: 32,
+                    paddingTop: 24,
+                    borderTop: "1px solid var(--border-light)",
+                    textAlign: "center"
+                }}>
+                    <p style={{
+                        fontSize: 13,
+                        color: "var(--text-tertiary)",
+                        margin: 0
+                    }}>
+                        © {new Date().getFullYear()} KIPS Education System. All rights reserved.
+                    </p>
+                </div>
             </div>
         </div>
     );

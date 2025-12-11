@@ -84,11 +84,6 @@ export default function RequestForm({ department, entitledVehicles = [] }: { dep
 
             <div className="form-group" style={{ marginBottom: 24 }}>
                 <label style={{ marginBottom: 12, display: "block" }}>Passengers Traveling (Optional)</label>
-                {passengers.length === 0 && (
-                    <p style={{ fontSize: "13px", color: "var(--text-tertiary)", marginBottom: 8 }}>
-                        No passengers added. Click "Add Passenger" if you have passengers traveling with you.
-                    </p>
-                )}
                 {passengers.map((name, index) => (
                     <div key={index} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
                         <input
@@ -199,20 +194,18 @@ export default function RequestForm({ department, entitledVehicles = [] }: { dep
                 </div>
             )}
 
-            <div className="form-grid">
-                <div className="form-group">
-                    <label>From Location</label>
-                    <div className="input-wrapper">
-                        <Icons.Location />
-                        <input name="fromLoc" required placeholder="Starting point" className="has-icon" />
-                    </div>
+            <div className="form-group">
+                <label>From Location</label>
+                <div className="input-wrapper">
+                    <Icons.Location />
+                    <input name="fromLoc" required placeholder="Starting point" className="has-icon" />
                 </div>
-                <div className="form-group">
-                    <label>To Location</label>
-                    <div className="input-wrapper">
-                        <Icons.Location />
-                        <input name="toLoc" required placeholder="Destination" className="has-icon" />
-                    </div>
+            </div>
+            <div className="form-group">
+                <label>To Location</label>
+                <div className="input-wrapper">
+                    <Icons.Location />
+                    <input name="toLoc" required placeholder="Destination" className="has-icon" />
                 </div>
             </div>
 
@@ -268,68 +261,64 @@ export default function RequestForm({ department, entitledVehicles = [] }: { dep
                 </button>
             </div>
 
-            <div className="form-grid">
-                <div className="form-group">
-                    <label>Departure Time</label>
-                    <div className="input-wrapper">
-                        <Icons.Calendar />
-                        <DateTimePicker
-                            name="fromTime"
-                            value={fromTime}
-                            onChange={(value) => {
-                                setFromTime(value);
-                                // Update toTime min if needed
-                                if (toTime && value > toTime) {
-                                    setToTime(value);
-                                }
-                            }}
-                            required
-                            placeholder="dd/mm/yyyy, --:--"
-                        />
-                    </div>
-                </div>
-
-                <div className="form-group">
-                    <label>Return Time</label>
-                    <div className="input-wrapper">
-                        <Icons.Calendar />
-                        <DateTimePicker
-                            name="toTime"
-                            value={toTime}
-                            onChange={setToTime}
-                            min={fromTime || undefined}
-                            required
-                            placeholder="dd/mm/yyyy, --:--"
-                        />
-                    </div>
+            <div className="form-group">
+                <label>Departure Time</label>
+                <div className="input-wrapper">
+                    <Icons.Calendar />
+                    <DateTimePicker
+                        name="fromTime"
+                        value={fromTime}
+                        onChange={(value) => {
+                            setFromTime(value);
+                            // Update toTime min if needed
+                            if (toTime && value > toTime) {
+                                setToTime(value);
+                            }
+                        }}
+                        required
+                        placeholder="dd/mm/yyyy, --:--"
+                    />
                 </div>
             </div>
 
-            <div className="form-grid">
-                <div className="form-group">
-                    <label>Company</label>
-                    <div className="input-wrapper">
-                        <Icons.Building />
-                        <select name="company" required className="has-icon" defaultValue="KIPS_PREPS">
-                            <option value="KIPS_PREPS">KIPS Preps</option>
-                            <option value="TETB">TETB</option>
-                            <option value="QUALITY_BRANDS">Quality Brands</option>
-                            <option value="KDP">KDP</option>
-                        </select>
-                    </div>
+            <div className="form-group">
+                <label>Return Time</label>
+                <div className="input-wrapper">
+                    <Icons.Calendar />
+                    <DateTimePicker
+                        name="toTime"
+                        value={toTime}
+                        onChange={setToTime}
+                        min={fromTime || undefined}
+                        required
+                        placeholder="dd/mm/yyyy, --:--"
+                    />
                 </div>
-                <div className="form-group">
-                    <label>Department</label>
-                    <div className="input-wrapper">
-                        <Icons.UserGroup />
-                        <input
-                            name="department_display"
-                            value={department || "Not Assigned"}
-                            disabled
-                            className="has-icon"
-                            style={{ opacity: 0.7, cursor: "not-allowed", background: "var(--bg)" }}
-                        />
-                    </div>
+            </div>
+
+            <div className="form-group">
+                <label>Company</label>
+                <div className="input-wrapper">
+                    <Icons.Building />
+                    <select name="company" required className="has-icon" defaultValue="KIPS_PREPS">
+                        <option value="KIPS_PREPS">KIPS Preps</option>
+                        <option value="TETB">TETB</option>
+                        <option value="QUALITY_BRANDS">Quality Brands</option>
+                        <option value="KDP">KDP</option>
+                    </select>
+                </div>
+            </div>
+            <div className="form-group">
+                <label>Department</label>
+                <div className="input-wrapper">
+                    <Icons.UserGroup />
+                    <input
+                        name="department_display"
+                        value={department || "Not Assigned"}
+                        disabled
+                        className="has-icon"
+                        style={{ opacity: 0.7, cursor: "not-allowed", background: "var(--bg)" }}
+                    />
                 </div>
             </div>
 

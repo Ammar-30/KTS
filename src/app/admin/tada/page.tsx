@@ -210,6 +210,7 @@ export default async function AdminTadaPage({
                             <tr style={{ textAlign: "left", color: "var(--text-tertiary)", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                                 <th style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>Employee</th>
                                 <th style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>Trip</th>
+                                <th style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>Type</th>
                                 <th style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>Amount</th>
                                 <th style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>Status</th>
                                 <th style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>Date</th>
@@ -236,6 +237,22 @@ export default async function AdminTadaPage({
                                         <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
                                             {fmtDateTime(request.trip.fromTime)}
                                         </div>
+                                    </td>
+                                    <td style={{ padding: "16px", borderBottom: "1px solid var(--border-light)" }}>
+                                        <span style={{
+                                            padding: "4px 8px",
+                                            borderRadius: "6px",
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                            background: "var(--bg-body)",
+                                            border: "1px solid var(--border)"
+                                        }}>
+                                            {request.claimType === "Fuel" ? "⛽ Fuel" :
+                                                request.claimType === "Lunch" ? "🍽️ Lunch" :
+                                                    request.claimType === "Toll" ? "🛣️ Toll" :
+                                                        request.claimType === "Parking" ? "🅿️ Parking" :
+                                                            "📋 Other"}
+                                        </span>
                                     </td>
                                     <td style={{ padding: "16px", borderBottom: "1px solid var(--border-light)" }}>
                                         <div style={{ fontWeight: 600, color: "var(--text-main)" }}>
@@ -269,7 +286,7 @@ export default async function AdminTadaPage({
                             ))}
                             {filteredRequests.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} style={{ padding: "40px", textAlign: "center", color: "var(--text-tertiary)" }}>
+                                    <td colSpan={6} style={{ padding: "40px", textAlign: "center", color: "var(--text-tertiary)" }}>
                                         <div style={{ fontSize: "48px", marginBottom: "16px" }}>💰</div>
                                         <div style={{ fontSize: "16px", fontWeight: 500 }}>
                                             {selectedEmployee

@@ -252,10 +252,10 @@ export default async function AdminMaintenancePage({
                                     </td>
                                     <td style={{ padding: "16px", borderBottom: "1px solid var(--border-light)" }}>
                                         <div style={{ fontWeight: 600 }}>
-                                            {request.entitledVehicle.vehicleNumber}
+                                            {request.entitledVehicle?.vehicleNumber || "—"}
                                         </div>
                                         <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                                            {request.entitledVehicle.vehicleType || "—"}
+                                            {request.entitledVehicle?.vehicleType || "—"}
                                         </div>
                                     </td>
                                     <td style={{

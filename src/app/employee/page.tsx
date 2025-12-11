@@ -3,9 +3,11 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { prisma } from "@lib/db";
 import { getSession } from "@lib/auth";
 import StatCard from "@/components/StatCard";
+import StatusBadge from "@/components/StatusBadge";
 
 
 async function getData() {
@@ -48,11 +50,11 @@ export default async function EmployeePage() {
 
     return (
         <>
-            <div style={{ marginBottom: "40px" }}>
-                <h1 style={{ fontSize: "32px", marginBottom: "8px" }}>
-                    Welcome back, <span style={{ background: "var(--primary-gradient)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{userName}</span>
+            <div className="page-header">
+                <h1 className="welcome-text">
+                    Welcome back, <span className="text-gradient">{userName}</span>
                 </h1>
-                <p style={{ fontSize: "16px", maxWidth: "600px" }}>Here is an overview of your transport activity. You have <strong style={{ color: "var(--text-main)" }}>{upcoming.length} upcoming trips</strong> scheduled.</p>
+                <p className="subtitle">You have <strong>{upcoming.length} upcoming trips</strong> scheduled.</p>
             </div>
 
             <div className="stat-grid">
@@ -62,32 +64,30 @@ export default async function EmployeePage() {
                 <StatCard title="Completed" value={stats.completed} index={3} />
             </div>
 
-            <div style={{ marginBottom: "32px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
+            <div className="mb-8">
+                <div className="flex items-center justify-between mb-6">
                     <h2>Upcoming Trips</h2>
-                    <a href="/employee/trips" className="btn btn-secondary" style={{ fontSize: "13px", padding: "8px 16px" }}>View All</a>
+                    <Link href="/employee/trips" className="btn btn-secondary btn-sm">View All</Link>
                 </div>
 
                 {upcoming.length === 0 ? (
-                    <div className="card" style={{ textAlign: "center", padding: "48px", color: "var(--text-tertiary)" }}>
-                        <p>No upcoming trips scheduled.</p>
-                        <a href="/employee/request" className="btn btn-primary" style={{ marginTop: "16px" }}>Request a Trip</a>
+                    <div className="card text-center p-8 text-muted">
+                        <p className="mb-4">No upcoming trips scheduled.</p>
+                        <Link href="/employee/request" className="btn btn-primary">Request a Trip</Link>
                     </div>
                 ) : (
-                    <div style={{ display: "grid", gap: "16px" }}>
+                    <div className="grid gap-4">
                         {upcoming.map(trip => (
-                            <div key={trip.id} className="card" style={{ padding: "24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <div key={trip.id} className="card p-6 flex items-center justify-between">
                                 <div>
-                                    <div style={{ fontWeight: 600, fontSize: "16px", marginBottom: "4px" }}>{trip.purpose || "Trip"}</div>
-                                    <div style={{ color: "var(--text-secondary)", fontSize: "14px", display: "flex", alignItems: "center", gap: "8px" }}>
+                                    <div className="font-semibold text-lg mb-1">{trip.purpose || "Trip"}</div>
+                                    <div className="text-sm text-muted flex items-center gap-2">
                                         <span>{new Date(trip.fromTime).toLocaleDateString("en-GB", { weekday: 'short', day: 'numeric', month: 'short' })}</span>
-                                        <span style={{ width: 4, height: 4, background: "currentColor", borderRadius: "50%", opacity: 0.5 }}></span>
+                                        <span className="dot-separator"></span>
                                         <span>{trip.fromLoc} → {trip.toLoc}</span>
                                     </div>
                                 </div>
-                                <span className={`badge ${trip.status.includes("Approved") ? "success" : "warning"}`}>
-                                    {trip.status}
-                                </span>
+                                <StatusBadge status={trip.status} type="trip" />
                             </div>
                         ))}
                     </div>

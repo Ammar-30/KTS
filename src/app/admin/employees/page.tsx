@@ -8,6 +8,7 @@ import { getSession } from "@lib/auth";
 import StatCard from "@/components/StatCard";
 import UserAvatar from "@/components/UserAvatar";
 import UserManageDropdown from "@/components/UserManageDropdown";
+import AddEmployeeModal from "./AddEmployeeModal";
 
 async function getData() {
     const session = await getSession();
@@ -75,64 +76,7 @@ export default async function EmployeesPage({
                 <div className="flex-between mb-4" style={{ alignItems: "center", borderBottom: "1px solid var(--border-light)", paddingBottom: "16px" }}>
                     <h2 style={{ margin: 0 }}>Users Directory</h2>
 
-                    <details className="dropdown-right" style={{ position: "relative" }}>
-                        <summary className="btn btn-primary" style={{ listStyle: "none", cursor: "pointer" }}>
-                            + Add Employee
-                        </summary>
-                        <div className="dropdown-menu dropdown-content" style={{ 
-                            width: "420px", 
-                            padding: "24px",
-                            background: "var(--bg-panel)",
-                            borderRadius: "var(--radius-lg)",
-                            boxShadow: "var(--shadow-xl)",
-                            border: "1px solid var(--border-light)"
-                        }}>
-                            <h3 style={{ 
-                                marginTop: 0, 
-                                marginBottom: "24px",
-                                fontSize: "20px",
-                                fontWeight: 600,
-                                color: "var(--text-main)",
-                                letterSpacing: "-0.02em"
-                            }}>Add New Employee</h3>
-                            <form action="/api/admin/create-employee" method="post" style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-                                <div className="form-group" style={{ marginBottom: "20px" }}>
-                                    <label>Name *</label>
-                                    <input name="name" required placeholder="Full Name" />
-                                </div>
-                                <div className="form-group" style={{ marginBottom: "20px" }}>
-                                    <label>Email *</label>
-                                    <input name="email" type="email" required placeholder="email@example.com" />
-                                </div>
-                                <div className="form-group" style={{ marginBottom: "20px" }}>
-                                    <label>Password *</label>
-                                    <input name="password" type="password" required placeholder="Initial password" />
-                                </div>
-                                <div className="form-group" style={{ marginBottom: "20px" }}>
-                                    <label>Role</label>
-                                    <select name="role" defaultValue="EMPLOYEE" style={{ 
-                                        width: "100%",
-                                        fontWeight: 500
-                                    }}>
-                                        <option value="EMPLOYEE">Employee</option>
-                                        <option value="MANAGER">Manager</option>
-                                        <option value="TRANSPORT">Transport</option>
-                                        <option value="ADMIN">Admin</option>
-                                    </select>
-                                </div>
-                                <div className="form-group" style={{ marginBottom: "24px" }}>
-                                    <label>Department</label>
-                                    <input name="department" placeholder="e.g. IT, HR, Sales" />
-                                </div>
-                                <button type="submit" className="btn btn-primary" style={{ 
-                                    width: "100%",
-                                    padding: "12px 24px",
-                                    fontSize: "15px",
-                                    fontWeight: 600
-                                }}>Create User</button>
-                            </form>
-                        </div>
-                    </details>
+                    <AddEmployeeModal />
                 </div>
 
                 <div className="table-wrapper" style={{ overflow: "visible", position: "relative" }}>

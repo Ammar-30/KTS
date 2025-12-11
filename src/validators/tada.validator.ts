@@ -21,8 +21,18 @@ const sanitizedString = z
 
 export const createTadaSchema = z.object({
   tripId: z.string().cuid(),
+  claimType: z.enum(["Fuel", "Lunch", "Toll", "Parking", "Other"]),
   amount: z.coerce.number().positive().max(1000000), // Max 1 million
   description: sanitizedString,
+});
+
+export const createTadaBatchSchema = z.object({
+  tripId: z.string().cuid(),
+  claims: z.array(z.object({
+    claimType: z.enum(["Fuel", "Lunch", "Toll", "Parking", "Other"]),
+    amount: z.coerce.number().positive().max(1000000),
+    description: sanitizedString,
+  })).min(1).max(10), // Limit to 10 claims per batch
 });
 
 export const approveTadaSchema = z.object({

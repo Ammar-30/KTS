@@ -161,7 +161,7 @@ export default async function TransportPage({
                                 <th>Purpose</th>
                                 <th>From → To</th>
                                 <th>Time</th>
-                                <th style={{ minWidth: 400 }}>Assign</th>
+                                <th>Assign</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -172,7 +172,7 @@ export default async function TransportPage({
                                     if (t.passengerNames) passengerList = JSON.parse(t.passengerNames);
                                 } catch (e) { /* ignore */ }
                                 const passengerCount = passengerList.filter(p => p.trim() !== "").length;
-                                
+
                                 return (
                                     <tr key={t.id}>
                                         <td>
@@ -195,90 +195,56 @@ export default async function TransportPage({
                                                 <span>{t.toLoc}</span>
                                             </div>
                                         </td>
-                                        <td>
-                                            <div style={{ fontSize: 13 }}>
-                                                <div>{fmtDateTime(t.fromTime)}</div>
-                                                <div style={{ color: 'var(--text-tertiary)' }}>to {fmtDateTime(t.toTime)}</div>
+                                        <td style={{ whiteSpace: "nowrap" }}>
+                                            <div style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-main)" }}>
+                                                {new Date(t.fromTime).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                            </div>
+                                            <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                                                {new Date(t.fromTime).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })} - {new Date(t.toTime).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
                                             </div>
                                         </td>
-                                        <td className="actions">
+                                        <td>
                                             <form
                                                 action="/api/trips/assign"
                                                 method="post"
-                                                style={{ display: "flex", gap: 8, flexDirection: "column", minWidth: 360 }}
+                                                style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}
                                             >
                                                 <input type="hidden" name="tripId" value={t.id} />
-
-                                                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: "8px" }}>
-                                                    <select 
-                                                        name="driverId" 
-                                                        required 
-                                                        style={{ 
-                                                            flex: "1 1 160px",
-                                                            minWidth: 160,
-                                                            padding: "8px 12px"
-                                                        }}
-                                                    >
-                                                        <option value="">Select driver…</option>
-                                                        {avail.drivers.map((d) => (
-                                                            <option key={d.id} value={d.id}>
-                                                                {d.label}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-
-                                                    <select 
-                                                        name="vehicleId" 
-                                                        required 
-                                                        style={{ 
-                                                            flex: "1 1 160px",
-                                                            minWidth: 160,
-                                                            padding: "8px 12px"
-                                                        }}
-                                                    >
-                                                        <option value="">Select vehicle…</option>
-                                                        {avail.vehicles.map((v) => (
-                                                            <option key={v.id} value={v.id}>
-                                                                {v.label}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </div>
-
-                                                <div style={{ display: "flex", justifyContent: "center", marginBottom: "8px" }}>
-                                                    <div className="input-wrapper" style={{ width: "140px", maxWidth: "100%" }}>
-                                                        <svg className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                                        </svg>
-                                                        <input
-                                                            name="startMileage"
-                                                            type="number"
-                                                            placeholder="Mileage"
-                                                            required
-                                                            min="0"
-                                                            className="has-icon"
-                                                            style={{ width: "100%" }}
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                <button 
-                                                    type="submit" 
-                                                    className="btn btn-primary" 
-                                                    style={{ 
-                                                        width: "100%",
-                                                        padding: "8px 16px"
-                                                    }}
+                                                <select
+                                                    name="driverId"
+                                                    required
+                                                    style={{ padding: "6px 8px", fontSize: "12px", minWidth: "90px", maxWidth: "110px" }}
+                                                >
+                                                    <option value="">Driver</option>
+                                                    {avail.drivers.map((d) => (
+                                                        <option key={d.id} value={d.id}>{d.label}</option>
+                                                    ))}
+                                                </select>
+                                                <select
+                                                    name="vehicleId"
+                                                    required
+                                                    style={{ padding: "6px 8px", fontSize: "12px", minWidth: "90px", maxWidth: "110px" }}
+                                                >
+                                                    <option value="">Vehicle</option>
+                                                    {avail.vehicles.map((v) => (
+                                                        <option key={v.id} value={v.id}>{v.label}</option>
+                                                    ))}
+                                                </select>
+                                                <input
+                                                    name="startMileage"
+                                                    type="number"
+                                                    placeholder="KM"
+                                                    required
+                                                    min="0"
+                                                    style={{ padding: "6px 8px", fontSize: "12px", width: "55px" }}
+                                                />
+                                                <button
+                                                    type="submit"
+                                                    className="btn btn-primary"
+                                                    style={{ padding: "6px 14px", fontSize: "12px" }}
                                                 >
                                                     Assign
                                                 </button>
-
-                                                {(avail.drivers.length === 0 || avail.vehicles.length === 0) && (
-                                                    <div style={{ fontSize: "12px", color: "var(--danger-text)", marginTop: 4 }}>
-                                                        {avail.drivers.length === 0 && "No drivers available. "}
-                                                        {avail.vehicles.length === 0 && "No vehicles available."}
-                                                    </div>
-                                                )}
                                             </form>
                                         </td>
                                     </tr>

@@ -9,7 +9,9 @@ export default function DateRangeFilter() {
     const searchParams = useSearchParams();
 
     const [filterType, setFilterType] = useState<"all" | "month" | "custom">("all");
-    const [month, setMonth] = useState("");
+    // Initialize with current month in YYYY-MM format
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const [month, setMonth] = useState(currentMonth);
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
 
@@ -52,7 +54,7 @@ export default function DateRangeFilter() {
             params.set("endDate", end.toISOString().split("T")[0]);
             router.push(`${pathname}?${params.toString()}`);
         }
-    }, [month, filterType, pathname, router, searchParams]);
+    }, [month, filterType, pathname, router]);
 
     // Auto-apply filter when custom dates are selected
     useEffect(() => {
@@ -62,7 +64,7 @@ export default function DateRangeFilter() {
             params.set("endDate", endDate);
             router.push(`${pathname}?${params.toString()}`);
         }
-    }, [startDate, endDate, filterType, pathname, router, searchParams]);
+    }, [startDate, endDate, filterType, pathname, router]);
 
     return (
         <div className="card mb-4" style={{

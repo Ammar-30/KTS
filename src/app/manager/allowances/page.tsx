@@ -56,6 +56,7 @@ export default async function ManagerAllowancesPage({ searchParams }: { searchPa
                             <tr>
                                 <th>Requester</th>
                                 <th>Trip Details</th>
+                                <th>Type</th>
                                 <th>Amount</th>
                                 <th>Description</th>
                                 <th>Actions</th>
@@ -76,6 +77,22 @@ export default async function ManagerAllowancesPage({ searchParams }: { searchPa
                                             {fmtDateTime(c.trip.fromTime)}
                                         </div>
                                     </td>
+                                    <td>
+                                        <span style={{
+                                            padding: "4px 8px",
+                                            borderRadius: "6px",
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                            background: "var(--bg-body)",
+                                            border: "1px solid var(--border)"
+                                        }}>
+                                            {c.claimType === "Fuel" ? "⛽ Fuel" :
+                                                c.claimType === "Lunch" ? "🍽️ Lunch" :
+                                                    c.claimType === "Toll" ? "🛣️ Toll" :
+                                                        c.claimType === "Parking" ? "🅿️ Parking" :
+                                                            "📋 Other"}
+                                        </span>
+                                    </td>
                                     <td style={{ fontWeight: 600 }}>Rs. {c.amount.toLocaleString()}</td>
                                     <td style={{ maxWidth: 300 }}>{c.description}</td>
                                     <td className="actions">
@@ -85,8 +102,8 @@ export default async function ManagerAllowancesPage({ searchParams }: { searchPa
                                                 name="decision"
                                                 value="approve"
                                                 className="btn btn-primary"
-                                                style={{ 
-                                                    padding: "8px 16px", 
+                                                style={{
+                                                    padding: "8px 16px",
                                                     fontSize: 13,
                                                     whiteSpace: "nowrap",
                                                     flexShrink: 0
@@ -98,10 +115,10 @@ export default async function ManagerAllowancesPage({ searchParams }: { searchPa
                                                 name="decision"
                                                 value="reject"
                                                 className="btn btn-secondary"
-                                                style={{ 
-                                                    padding: "8px 16px", 
-                                                    fontSize: 13, 
-                                                    color: "var(--danger-text)", 
+                                                style={{
+                                                    padding: "8px 16px",
+                                                    fontSize: 13,
+                                                    color: "var(--danger-text)",
                                                     borderColor: "var(--danger-border)",
                                                     whiteSpace: "nowrap",
                                                     flexShrink: 0
@@ -115,7 +132,7 @@ export default async function ManagerAllowancesPage({ searchParams }: { searchPa
                             ))}
                             {pendingClaims.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} style={{ textAlign: "center", padding: 32, color: "var(--text-tertiary)" }}>
+                                    <td colSpan={6} style={{ textAlign: "center", padding: 32, color: "var(--text-tertiary)" }}>
                                         No pending claims.
                                     </td>
                                 </tr>

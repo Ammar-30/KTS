@@ -7,6 +7,8 @@ import { prisma } from "@lib/db";
 import { getSession } from "@lib/auth";
 import { fmtDateTime } from "@lib/utils";
 import StatCard from "@/components/StatCard";
+import StatusBadge from "@/components/StatusBadge";
+import TripActionButtons from "./TripActionButtons";
 
 async function getData() {
     const session = await getSession();
@@ -57,7 +59,7 @@ export default async function ManagerPage({
     return (
         <>
             {notice && (
-                <div style={{
+                <div className={`notice ${kind === "error" ? "notice-error" : "notice-success"}`} style={{
                     padding: "12px 20px",
                     borderRadius: "8px",
                     marginBottom: "24px",
@@ -69,7 +71,7 @@ export default async function ManagerPage({
                 </div>
             )}
 
-            <div style={{ marginBottom: "32px" }}>
+            <div className="page-header" style={{ marginBottom: "32px" }}>
                 <h1 className="welcome-text">Welcome {userName}!</h1>
                 <p>Review and approve transport requests.</p>
             </div>
@@ -80,7 +82,7 @@ export default async function ManagerPage({
                 <StatCard title="Team Activity" value="Active" trend="Normal" trendUp={true} index={2} />
             </div>
 
-            <div className="card">
+            <div className="card" style={{ transform: "none", transition: "none" }}>
                 <h2>Pending Requests</h2>
                 <div className="table-wrapper" style={{ marginTop: "20px" }}>
                     <table>
@@ -106,29 +108,17 @@ export default async function ManagerPage({
                                 return (
                                     <tr key={t.id}>
                                         <td>
-                                            <div style={{ fontWeight: 500 }}>{t.requester.name}</div>
-                                            <div style={{ fontSize: "12px", color: "var(--text-tertiary)" }}>{t.requester.department || "N/A"}</div>
+                                            <div className="font-medium">{t.requester.name}</div>
+                                            <div className="text-xs text-muted">{t.requester.department || "N/A"}</div>
                                         </td>
                                         <td>{companyLabel(t.company)}</td>
                                         <td>
-                                            <span style={{
-                                                padding: "4px 8px",
-                                                borderRadius: "4px",
-                                                fontSize: "12px",
-                                                fontWeight: 500,
-                                                background: t.vehicleCategory === "FLEET" ? "var(--info-bg)" :
-                                                    t.vehicleCategory === "PERSONAL" ? "var(--warning-bg)" : "var(--success-bg)",
-                                                color: t.vehicleCategory === "FLEET" ? "var(--info-text)" :
-                                                    t.vehicleCategory === "PERSONAL" ? "var(--warning-text)" : "var(--success-text)"
-                                            }}>
-                                                {t.vehicleCategory === "FLEET" ? "Fleet" :
-                                                    t.vehicleCategory === "PERSONAL" ? "Personal" : "Entitled"}
-                                            </span>
+                                            <StatusBadge status={t.vehicleCategory} type="vehicle" />
                                         </td>
-                                        <td style={{ textAlign: "center" }}>
+                                        <td className="text-center">
                                             {passengerList.length > 0 ? (
-                                                <details style={{ position: "relative", display: "inline-block" }}>
-                                                    <summary style={{
+                                                <details className="dropdown-right" style={{ position: "relative", display: "inline-block" }}>
+                                                    <summary className="link-primary" style={{
                                                         cursor: "pointer",
                                                         listStyle: "none",
                                                         color: "var(--primary)",
@@ -137,24 +127,21 @@ export default async function ManagerPage({
                                                     }}>
                                                         {passengerList.length} {passengerList.length === 1 ? "Person" : "People"}
                                                     </summary>
-                                                    <div style={{
+                                                    <div className="dropdown-menu" style={{
                                                         position: "absolute",
                                                         top: "100%",
                                                         left: "50%",
                                                         transform: "translateX(-50%)",
                                                         marginTop: 4,
-                                                        background: "var(--bg-card)",
-                                                        border: "1px solid var(--border)",
-                                                        borderRadius: "8px",
-                                                        padding: "12px",
-                                                        boxShadow: "var(--shadow-lg)",
-                                                        zIndex: 50,
+                                                        zIndex: 1000,
                                                         minWidth: 200,
-                                                        whiteSpace: "nowrap"
+                                                        whiteSpace: "nowrap",
+                                                        boxShadow: "0 10px 40px rgba(0, 0, 0, 0.15)",
+                                                        border: "1px solid var(--border)"
                                                     }}>
-                                                        <div style={{ fontWeight: 600, marginBottom: 8, fontSize: 13 }}>Passengers:</div>
+                                                        <div className="dropdown-header" style={{ fontWeight: 600, marginBottom: 8, fontSize: 13 }}>Passengers:</div>
                                                         {passengerList.map((name, idx) => (
-                                                            <div key={idx} style={{ fontSize: 13, padding: "4px 0" }}>
+                                                            <div key={idx} className="dropdown-item" style={{ fontSize: 13, padding: "4px 0" }}>
                                                                 {idx + 1}. {name}
                                                             </div>
                                                         ))}
@@ -172,128 +159,40 @@ export default async function ManagerPage({
 
                                                 if (stops.length > 0) {
                                                     return (
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                                                        <div className="route-list" style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                                                             <span>{t.fromLoc}</span>
                                                             {stops.map((stop, idx) => (
-                                                                <span key={idx} style={{ color: "var(--text-tertiary)" }}>→ {stop}</span>
+                                                                <span key={idx} className="text-muted">→ {stop}</span>
                                                             ))}
-                                                            <span style={{ color: "var(--text-tertiary)" }}>→</span>
+                                                            <span className="text-muted">→</span>
                                                             <span>{t.toLoc}</span>
                                                         </div>
                                                     );
                                                 }
                                                 return (
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    <div className="route-simple" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                         <span>{t.fromLoc}</span>
-                                                        <span style={{ color: "var(--text-tertiary)" }}>→</span>
+                                                        <span className="text-muted">→</span>
                                                         <span>{t.toLoc}</span>
                                                     </div>
                                                 );
                                             })()}
                                         </td>
                                         <td>
-                                            <div style={{ fontSize: 13 }}>
+                                            <div className="text-sm">
                                                 <div>{fmtDateTime(t.fromTime)}</div>
-                                                <div style={{ color: 'var(--text-tertiary)' }}>to {fmtDateTime(t.toTime)}</div>
+                                                <div className="text-muted">to {fmtDateTime(t.toTime)}</div>
                                             </div>
                                         </td>
                                         <td className="actions">
-                                            <form
-                                                action="/api/trips/approve"
-                                                method="post"
-                                                style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "nowrap" }}
-                                            >
-                                                <input type="hidden" name="tripId" value={t.id} />
-                                                <button 
-                                                    name="decision" 
-                                                    value="approve" 
-                                                    type="submit" 
-                                                    className="btn btn-primary" 
-                                                    style={{ 
-                                                        padding: "8px 16px", 
-                                                        fontSize: "13px",
-                                                        whiteSpace: "nowrap",
-                                                        flexShrink: 0
-                                                    }}
-                                                >
-                                                    Approve
-                                                </button>
-
-                                                <details style={{ position: "relative", flexShrink: 0 }}>
-                                                    <summary 
-                                                        style={{ 
-                                                            cursor: "pointer", 
-                                                            listStyle: "none", 
-                                                            padding: "8px 16px", 
-                                                            fontSize: "13px",
-                                                            whiteSpace: "nowrap"
-                                                        }} 
-                                                        className="btn btn-secondary" 
-                                                        title="Reject"
-                                                    >
-                                                        Reject
-                                                    </summary>
-                                                    <div 
-                                                        className="dropdown-content" 
-                                                        style={{
-                                                            width: 320,
-                                                            position: "absolute",
-                                                            right: 0,
-                                                            top: "100%",
-                                                            marginTop: 8,
-                                                            zIndex: 100,
-                                                            background: "var(--bg-panel)",
-                                                            boxShadow: "var(--shadow-xl)",
-                                                            borderRadius: "var(--radius-md)",
-                                                            border: "1px solid var(--border)",
-                                                            padding: "16px"
-                                                        }}
-                                                    >
-                                                        <label style={{ display: "block", marginBottom: 8, fontSize: 13, fontWeight: 600 }}>
-                                                            Rejection Reason
-                                                        </label>
-                                                        <textarea
-                                                            name="rejectionReason"
-                                                            rows={3}
-                                                            placeholder="e.g. Trip conflicts with existing schedule..."
-                                                            style={{
-                                                                width: "100%",
-                                                                marginBottom: 12,
-                                                                padding: "8px 12px",
-                                                                borderRadius: "var(--radius-sm)",
-                                                                border: "1px solid var(--input-border)",
-                                                                fontSize: "13px",
-                                                                resize: "vertical"
-                                                            }}
-                                                        />
-                                                        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-                                                            <button 
-                                                                name="decision" 
-                                                                value="reject" 
-                                                                type="submit" 
-                                                                className="btn" 
-                                                                style={{ 
-                                                                    background: "var(--danger-bg)", 
-                                                                    color: "var(--danger-text)", 
-                                                                    borderColor: "var(--danger-border)",
-                                                                    fontSize: "13px", 
-                                                                    padding: "8px 16px",
-                                                                    whiteSpace: "nowrap"
-                                                                }}
-                                                            >
-                                                                Confirm Rejection
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </details>
-                                            </form>
+                                            <TripActionButtons tripId={t.id} />
                                         </td>
                                     </tr>
                                 );
                             })}
                             {items.length === 0 && (
                                 <tr>
-                                    <td colSpan={8} style={{ textAlign: "center", padding: "32px", color: "var(--text-tertiary)" }}>
+                                    <td colSpan={8} className="text-center p-8 text-muted" style={{ textAlign: "center", padding: "32px", color: "var(--text-tertiary)" }}>
                                         No pending requests.
                                     </td>
                                 </tr>

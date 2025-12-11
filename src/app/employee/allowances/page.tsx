@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@lib/db";
 import { getSession } from "@lib/auth";
 import { fmtDateTime } from "@lib/utils";
+import ClaimSubmissionForm from "./ClaimSubmissionForm";
 
 async function getData() {
     const session = await getSession();
@@ -18,13 +19,12 @@ async function getData() {
         orderBy: { createdAt: "desc" }
     });
 
-    // Fetch eligible trips (Approved/Assigned/Completed trips, no existing claim)
-    // Assuming we only allow one claim per trip for now
+    // Fetch eligible trips (Approved/Assigned/Completed trips)
+    // Now allowing multiple claims per trip
     const eligibleTrips = await prisma.trip.findMany({
         where: {
             requesterId: session.sub,
-            status: { in: ["Approved", "TransportAssigned", "InProgress", "Completed"] },
-            tadaRequests: { none: {} }
+            status: { in: ["Approved", "TransportAssigned", "InProgress", "Completed"] }
         },
         orderBy: { createdAt: "desc" }
     });
@@ -56,42 +56,7 @@ export default async function AllowancesPage({ searchParams }: { searchParams: P
                 </div>
             )}
 
-            <div className="card">
-                <h2>Submit New Claim</h2>
-                <form action="/api/tada/create" method="post" style={{ marginTop: 20 }}>
-                    <div className="form-grid">
-                        <div className="form-group">
-                            <label>Select Trip</label>
-                            <select name="tripId" required className="input-field">
-                                <option value="">-- Select Completed Trip --</option>
-                                {eligibleTrips.map(t => (
-                                    <option key={t.id} value={t.id}>
-                                        {t.purpose} ({fmtDateTime(t.fromTime)})
-                                    </option>
-                                ))}
-                            </select>
-                            {eligibleTrips.length === 0 && (
-                                <p style={{ fontSize: 12, color: "var(--text-tertiary)", marginTop: 4 }}>
-                                    No eligible completed trips found.
-                                </p>
-                            )}
-                        </div>
-                        <div className="form-group">
-                            <label>Total Amount (PKR)</label>
-                            <input name="amount" type="number" min="0" step="0.01" required placeholder="e.g. 5000" />
-                        </div>
-                    </div>
-                    <div className="form-group">
-                        <label>Description / Details</label>
-                        <textarea name="description" rows={3} placeholder="Details of expenses..." required></textarea>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                        <button type="submit" className="button primary" disabled={eligibleTrips.length === 0}>
-                            Submit Claim
-                        </button>
-                    </div>
-                </form>
-            </div>
+            <ClaimSubmissionForm eligibleTrips={eligibleTrips} />
 
             <div className="card">
                 <h2>Claim History</h2>
@@ -101,6 +66,7 @@ export default async function AllowancesPage({ searchParams }: { searchParams: P
                             <tr>
                                 <th>Date</th>
                                 <th>Trip</th>
+                                <th>Type</th>
                                 <th>Amount</th>
                                 <th>Status</th>
                                 <th>Details</th>
@@ -115,6 +81,22 @@ export default async function AllowancesPage({ searchParams }: { searchParams: P
                                         <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
                                             {fmtDateTime(c.trip.fromTime)}
                                         </div>
+                                    </td>
+                                    <td>
+                                        <span style={{
+                                            padding: "4px 8px",
+                                            borderRadius: "6px",
+                                            fontSize: "12px",
+                                            fontWeight: 600,
+                                            background: "var(--bg-body)",
+                                            border: "1px solid var(--border)"
+                                        }}>
+                                            {c.claimType === "Fuel" ? "⛽ Fuel" :
+                                                c.claimType === "Lunch" ? "🍽️ Lunch" :
+                                                    c.claimType === "Toll" ? "🛣️ Toll" :
+                                                        c.claimType === "Parking" ? "🅿️ Parking" :
+                                                            "📋 Other"}
+                                        </span>
                                     </td>
                                     <td style={{ fontWeight: 600 }}>Rs. {c.amount.toLocaleString()}</td>
                                     <td>
@@ -134,7 +116,7 @@ export default async function AllowancesPage({ searchParams }: { searchParams: P
                             ))}
                             {claims.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} style={{ textAlign: "center", padding: 32, color: "var(--text-tertiary)" }}>
+                                    <td colSpan={6} style={{ textAlign: "center", padding: 32, color: "var(--text-tertiary)" }}>
                                         No claims found.
                                     </td>
                                 </tr>

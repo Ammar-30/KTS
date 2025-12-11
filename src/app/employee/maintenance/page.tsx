@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@lib/db";
 import { getSession } from "@lib/auth";
 import { fmtDateTime } from "@lib/utils";
+import ReportIssueModal from "@/components/ReportIssueModal";
 
 async function getData() {
     const session = await getSession();
@@ -124,17 +125,17 @@ export default async function MaintenancePage({ searchParams }: { searchParams: 
                             {maintenanceRequests.map(m => (
                                 <tr key={m.id}>
                                     <td>
-                                        <div style={{ fontWeight: 500 }}>{m.entitledVehicle.vehicleNumber}</div>
+                                        <div style={{ fontWeight: 500 }}>{m.entitledVehicle?.vehicleNumber || "—"}</div>
                                         <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
-                                            {m.entitledVehicle.vehicleType || "N/A"}
+                                            {m.entitledVehicle?.vehicleType || "N/A"}
                                         </div>
                                     </td>
                                     <td style={{ maxWidth: 300 }}>{m.description}</td>
                                     <td>
                                         <span className={`badge ${m.status === "COMPLETED" ? "success" :
-                                                m.status === "IN_PROGRESS" ? "info" :
-                                                    m.status === "APPROVED" ? "success" :
-                                                        m.status === "REJECTED" ? "danger" : "warning"
+                                            m.status === "IN_PROGRESS" ? "info" :
+                                                m.status === "APPROVED" ? "success" :
+                                                    m.status === "REJECTED" ? "danger" : "warning"
                                             }`}>
                                             {m.status === "IN_PROGRESS" ? "In Progress" :
                                                 m.status === "APPROVED" ? "Approved" :
@@ -144,6 +145,19 @@ export default async function MaintenancePage({ searchParams }: { searchParams: 
                                         {m.status === "REJECTED" && m.rejectionReason && (
                                             <div style={{ fontSize: 12, color: "var(--danger-text)", marginTop: 4 }}>
                                                 {m.rejectionReason}
+                                            </div>
+                                        )}
+                                        {m.issueReported && (
+                                            <div style={{
+                                                fontSize: 11,
+                                                color: "var(--warning-text)",
+                                                marginTop: 4,
+                                                background: "var(--warning-bg)",
+                                                padding: "2px 6px",
+                                                borderRadius: "4px",
+                                                display: "inline-block"
+                                            }}>
+                                                ⚠️ Issue Reported
                                             </div>
                                         )}
                                     </td>
@@ -160,9 +174,19 @@ export default async function MaintenancePage({ searchParams }: { searchParams: 
                                                 </button>
                                             </form>
                                         )}
-                                        {m.status === "COMPLETED" && m.completedAt && (
-                                            <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
-                                                Completed: {fmtDateTime(m.completedAt)}
+                                        {m.status === "COMPLETED" && (
+                                            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                                                <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
+                                                    Completed: {m.completedAt && fmtDateTime(m.completedAt)}
+                                                </div>
+                                                {!m.issueReported && (
+                                                    <ReportIssueModal requestId={m.id} />
+                                                )}
+                                                {m.issueReported && m.issueDescription && (
+                                                    <div style={{ fontSize: 12, color: "var(--warning-text)", marginTop: 4 }}>
+                                                        Issue: {m.issueDescription}
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                         {m.status === "REQUESTED" && (
@@ -197,3 +221,4 @@ export default async function MaintenancePage({ searchParams }: { searchParams: 
         </>
     );
 }
+

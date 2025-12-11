@@ -5,13 +5,14 @@ import { redirect } from "next/navigation";
 import { prisma } from "@lib/db";
 import { getSession } from "@lib/auth";
 import { fmtDateTime } from "@lib/utils";
+import CompleteMaintenanceModal from "./CompleteMaintenanceModal";
 
 async function getData() {
     const session = await getSession();
     if (!session) redirect("/login");
     if (session.role !== "TRANSPORT" && session.role !== "ADMIN") redirect("/login");
 
-    const [pendingRequests, fleetVehicles] = await Promise.all([
+    const [pendingRequests, fleetVehicles, reportedIssues] = await Promise.all([
         prisma.maintenanceRequest.findMany({
             where: { status: { in: ["APPROVED", "IN_PROGRESS"] } },
             include: {
@@ -24,14 +25,23 @@ async function getData() {
         prisma.vehicle.findMany({
             where: { active: true },
             orderBy: [{ type: "asc" }, { number: "asc" }]
+        }),
+        prisma.maintenanceRequest.findMany({
+            where: { issueReported: true },
+            include: {
+                entitledVehicle: true,
+                vehicle: true,
+                requester: true
+            },
+            orderBy: { issueReportedAt: "desc" }
         })
     ]);
 
-    return { pendingRequests, fleetVehicles };
+    return { pendingRequests, fleetVehicles, reportedIssues };
 }
 
 export default async function TransportMaintenancePage({ searchParams }: { searchParams: Promise<{ notice?: string, kind?: string }> }) {
-    const { pendingRequests, fleetVehicles } = await getData();
+    const { pendingRequests, fleetVehicles, reportedIssues } = await getData();
     const sp = await searchParams;
 
     return (
@@ -51,6 +61,71 @@ export default async function TransportMaintenancePage({ searchParams }: { searc
                     fontWeight: 500
                 }}>
                     {sp.notice}
+                </div>
+            )}
+
+            {/* Reported Issues Section */}
+            {reportedIssues.length > 0 && (
+                <div className="card" style={{ marginBottom: "24px", border: "1px solid var(--warning-border)", background: "var(--warning-bg)" }}>
+                    <h2 style={{ color: "var(--warning-text)", display: "flex", alignItems: "center", gap: "8px" }}>
+                        ⚠️ Reported Issues ({reportedIssues.length})
+                    </h2>
+                    <p style={{ fontSize: "13px", color: "var(--text-secondary)", marginBottom: "16px" }}>
+                        Employees have reported issues with completed maintenance work.
+                    </p>
+                    <div className="table-wrapper" style={{ marginTop: 12 }}>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Vehicle</th>
+                                    <th>Original Work</th>
+                                    <th>Issue Description</th>
+                                    <th>Reported</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {reportedIssues.map(m => {
+                                    const vehicleNumber = m.entitledVehicle?.vehicleNumber || m.vehicle?.number || "Unknown";
+                                    const vehicleType = m.entitledVehicle?.vehicleType || m.vehicle?.type || null;
+
+                                    return (
+                                        <tr key={m.id}>
+                                            <td>
+                                                <div style={{ fontWeight: 500 }}>{m.requester.name}</div>
+                                                <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
+                                                    {m.requester.email}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style={{ fontWeight: 500 }}>{vehicleNumber}</div>
+                                                <div style={{ fontSize: 12, color: "var(--text-tertiary)" }}>
+                                                    {vehicleType || "N/A"}
+                                                </div>
+                                            </td>
+                                            <td style={{ maxWidth: 200 }}>{m.description}</td>
+                                            <td style={{ maxWidth: 250, color: "var(--warning-text)", fontWeight: 500 }}>
+                                                {m.issueDescription}
+                                            </td>
+                                            <td>{m.issueReportedAt && fmtDateTime(m.issueReportedAt)}</td>
+                                            <td>
+                                                <form action="/api/maintenance/resolve-issue" method="post">
+                                                    <input type="hidden" name="requestId" value={m.id} />
+                                                    <button
+                                                        className="btn btn-primary"
+                                                        style={{ padding: "6px 12px", fontSize: 12 }}
+                                                    >
+                                                        Mark Resolved
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 
@@ -107,7 +182,7 @@ export default async function TransportMaintenancePage({ searchParams }: { searc
                                 const isFleetVehicle = !!m.vehicleId;
                                 const vehicleNumber = m.entitledVehicle?.vehicleNumber || m.vehicle?.number || "Unknown";
                                 const vehicleType = m.entitledVehicle?.vehicleType || m.vehicle?.type || null;
-                                
+
                                 return (
                                     <tr key={m.id}>
                                         <td>
@@ -147,62 +222,7 @@ export default async function TransportMaintenancePage({ searchParams }: { searc
                                                 </form>
                                             )}
                                             {m.status === "IN_PROGRESS" && (
-                                                <details style={{ position: "relative", display: "inline-block" }}>
-                                                    <summary
-                                                        className="btn btn-success"
-                                                        style={{
-                                                            padding: "6px 12px",
-                                                            fontSize: 13,
-                                                            cursor: "pointer",
-                                                            listStyle: "none"
-                                                        }}
-                                                    >
-                                                        Complete Work ▾
-                                                    </summary>
-                                                    <div
-                                                        className="dropdown-menu dropdown-content"
-                                                        style={{
-                                                            width: "280px",
-                                                            padding: "16px",
-                                                            position: "absolute",
-                                                            right: 0,
-                                                            top: "100%",
-                                                            marginTop: "4px"
-                                                        }}
-                                                    >
-                                                        <h4 style={{ margin: "0 0 12px 0", fontSize: "14px" }}>
-                                                            Complete Maintenance
-                                                        </h4>
-                                                        <form action="/api/maintenance/complete" method="post">
-                                                            <input type="hidden" name="requestId" value={m.id} />
-                                                            <div style={{ marginBottom: "12px" }}>
-                                                                <label style={{
-                                                                    display: "block",
-                                                                    marginBottom: "6px",
-                                                                    fontWeight: 500,
-                                                                    fontSize: "13px"
-                                                                }}>
-                                                                    Cost (PKR)
-                                                                </label>
-                                                                <input
-                                                                    name="cost"
-                                                                    type="number"
-                                                                    step="0.01"
-                                                                    min="0"
-                                                                    placeholder="Enter cost in PKR (optional)"
-                                                                    className="input-field"
-                                                                />
-                                                            </div>
-                                                            <button
-                                                                type="submit"
-                                                                className="btn btn-success"
-                                                                style={{ width: "100%" }}
-                                                            >
-                                                                Mark as Complete
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </details>
+                                                <CompleteMaintenanceModal requestId={m.id} />
                                             )}
                                         </td>
                                     </tr>
@@ -222,3 +242,4 @@ export default async function TransportMaintenancePage({ searchParams }: { searc
         </>
     );
 }
+

@@ -8,6 +8,7 @@ import { getSession } from "@lib/auth";
 import StatCard from "@/components/StatCard";
 import UserAvatar from "@/components/UserAvatar";
 import DeleteVehicleButton from "@/components/DeleteVehicleButton";
+import AddEntitledVehicleModal from "./AddEntitledVehicleModal";
 
 async function getData() {
     const session = await getSession();
@@ -81,34 +82,7 @@ export default async function EntitledVehiclesPage({
                 <div className="flex-between mb-4" style={{ alignItems: "center", borderBottom: "1px solid var(--border-light)", paddingBottom: "16px" }}>
                     <h2 style={{ margin: 0 }}>Vehicles Directory</h2>
 
-                    <details className="dropdown-right" style={{ position: "relative" }}>
-                        <summary className="btn btn-primary" style={{ listStyle: "none", cursor: "pointer" }}>
-                            + Assign Vehicle
-                        </summary>
-                        <div className="dropdown-menu dropdown-content" style={{ width: "400px" }}>
-                            <h3 style={{ marginTop: 0, marginBottom: "16px" }}>Assign New Vehicle</h3>
-                            <form action="/api/admin/assign-entitled-vehicle" method="post">
-                                <div className="form-group mb-3">
-                                    <label style={{ display: "block", marginBottom: "6px", fontWeight: 500, fontSize: "13px" }}>Vehicle Number *</label>
-                                    <input name="vehicleNumber" required placeholder="e.g. LEA-1234" className="input-field" style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                </div>
-                                <div className="form-group mb-3">
-                                    <label style={{ display: "block", marginBottom: "6px", fontWeight: 500, fontSize: "13px" }}>Vehicle Type</label>
-                                    <input name="vehicleType" placeholder="e.g. Sedan, SUV" className="input-field" style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                </div>
-                                <div className="form-group mb-4">
-                                    <label style={{ display: "block", marginBottom: "6px", fontWeight: 500, fontSize: "13px" }}>Assign To *</label>
-                                    <select name="userId" required style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border)" }}>
-                                        <option value="">Select Employee</option>
-                                        {users.map(u => (
-                                            <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>Assign Vehicle</button>
-                            </form>
-                        </div>
-                    </details>
+                    <AddEntitledVehicleModal users={users} />
                 </div>
 
                 <div className="table-wrapper">

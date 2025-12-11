@@ -49,6 +49,7 @@ model Vehicle {
   type      String?
   capacity  Int?
   active    Boolean  @default(true)
+  images    String   @default("[]") // JSON string of image URLs
   createdAt DateTime @default(now())
 
   trips Trip[] @relation("VehicleTrips")
@@ -135,6 +136,7 @@ model EntitledVehicle {
 model TadaRequest {
   id              String   @id @default(cuid())
   amount          Float
+  claimType       String   @default("Other") // Fuel, Lunch, Toll, Parking, Other
   description     String?
   status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
   rejectionReason String?
@@ -142,10 +144,11 @@ model TadaRequest {
   updatedAt       DateTime @updatedAt
 
   trip   Trip   @relation(fields: [tripId], references: [id])
-  tripId String @unique // One TADA request per trip
+  tripId String // Removed @unique to allow multiple claims per trip
 
   @@index([status])
   @@index([createdAt])
+  @@index([tripId])
 }
 
 model MaintenanceRequest {
@@ -157,6 +160,11 @@ model MaintenanceRequest {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   completedAt     DateTime?
+
+  // Issue reporting by employee
+  issueReported     Boolean  @default(false)
+  issueDescription  String?
+  issueReportedAt   DateTime?
 
   entitledVehicle   EntitledVehicle? @relation(fields: [entitledVehicleId], references: [id])
   entitledVehicleId String?
@@ -174,6 +182,7 @@ model MaintenanceRequest {
   @@index([entitledVehicleId])
   @@index([vehicleId])
   @@index([createdAt])
+  @@index([issueReported])
 }
 
 model Notification {

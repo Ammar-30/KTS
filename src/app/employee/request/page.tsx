@@ -56,7 +56,6 @@ export default async function RequestTripPage({
 
             <div style={{ marginBottom: "32px" }}>
                 <h1>Request a Trip</h1>
-                <p>Submit a new transport request for approval.</p>
             </div>
 
             <div className="card">

@@ -6,6 +6,8 @@ import { redirect } from "next/navigation";
 import { prisma } from "@lib/db";
 import { getSession } from "@lib/auth";
 import StatCard from "@/components/StatCard";
+import AddVehicleModal from "./AddVehicleModal";
+import ManageVehicleModal from "./ManageVehicleModal";
 
 async function getData() {
     const session = await getSession();
@@ -71,29 +73,7 @@ export default async function FleetPage({
                 <div className="flex-between mb-4" style={{ alignItems: "center", borderBottom: "1px solid var(--border-light)", paddingBottom: "16px" }}>
                     <h2 style={{ margin: 0 }}>Vehicles</h2>
 
-                    <details className="dropdown-right" style={{ position: "relative" }}>
-                        <summary className="btn btn-primary" style={{ listStyle: "none", cursor: "pointer" }}>
-                            + Add Vehicle
-                        </summary>
-                        <div className="dropdown-menu">
-                            <h3 style={{ marginTop: 0, marginBottom: "16px" }}>Add New Vehicle</h3>
-                            <form action="/api/vehicles/create" method="post">
-                                <div className="form-group mb-3">
-                                    <label style={{ display: "block", marginBottom: "6px", fontWeight: 500, fontSize: "13px" }}>Vehicle Number *</label>
-                                    <input name="number" required placeholder="LEA-1234" className="input-field" style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                </div>
-                                <div className="form-group mb-3">
-                                    <label style={{ display: "block", marginBottom: "6px", fontWeight: 500, fontSize: "13px" }}>Type</label>
-                                    <input name="type" placeholder="Sedan, SUV, Van..." className="input-field" style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                </div>
-                                <div className="form-group mb-4">
-                                    <label style={{ display: "block", marginBottom: "6px", fontWeight: 500, fontSize: "13px" }}>Capacity</label>
-                                    <input name="capacity" type="number" placeholder="4" className="input-field" style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                </div>
-                                <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>Add Vehicle</button>
-                            </form>
-                        </div>
-                    </details>
+                    <AddVehicleModal />
                 </div>
 
                 <div className="table-wrapper">
@@ -111,7 +91,48 @@ export default async function FleetPage({
                             {vehicles.map((v) => (
                                 <tr key={v.id} style={{ transition: "background 0.2s" }}>
                                     <td style={{ padding: "16px", borderBottom: "1px solid var(--border-light)" }}>
-                                        <div style={{ fontWeight: 600, color: "var(--text-main)" }}>{v.number}</div>
+                                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                                            {(() => {
+                                                let img = null;
+                                                try {
+                                                    const images = JSON.parse(v.images || "[]");
+                                                    if (images.length > 0) img = images[0];
+                                                } catch (e) { }
+
+                                                if (img) {
+                                                    return (
+                                                        <img
+                                                            src={img}
+                                                            alt={v.number}
+                                                            style={{
+                                                                width: "48px",
+                                                                height: "48px",
+                                                                objectFit: "cover",
+                                                                borderRadius: "8px",
+                                                                border: "1px solid var(--border)"
+                                                            }}
+                                                        />
+                                                    );
+                                                }
+                                                return (
+                                                    <div style={{
+                                                        width: "48px",
+                                                        height: "48px",
+                                                        borderRadius: "8px",
+                                                        background: "var(--bg-body)",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        fontSize: "20px",
+                                                        color: "var(--text-tertiary)",
+                                                        border: "1px solid var(--border)"
+                                                    }}>
+                                                        🚌
+                                                    </div>
+                                                );
+                                            })()}
+                                            <div style={{ fontWeight: 600, color: "var(--text-main)" }}>{v.number}</div>
+                                        </div>
                                     </td>
                                     <td style={{ padding: "16px", borderBottom: "1px solid var(--border-light)", color: "var(--text-secondary)" }}>
                                         {v.type || "—"}
@@ -132,39 +153,7 @@ export default async function FleetPage({
                                         </span>
                                     </td>
                                     <td className="actions" style={{ padding: "16px", borderBottom: "1px solid var(--border-light)", textAlign: "right" }}>
-                                        <details style={{ position: "relative", display: "inline-block" }}>
-                                            <summary className="btn btn-secondary" style={{ padding: "8px 16px", fontSize: "13px", cursor: "pointer", listStyle: "none", whiteSpace: "nowrap" }}>
-                                                Manage ▾
-                                            </summary>
-                                            <div className="dropdown-menu dropdown-right" style={{ width: "280px", padding: "16px", top: "100%", marginTop: 8 }}>
-                                                <h4 style={{ margin: "0 0 12px 0", fontSize: "14px" }}>Edit Vehicle</h4>
-                                                <form action="/api/vehicles/update" method="post">
-                                                    <input type="hidden" name="id" value={v.id} />
-                                                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                                                        <input name="number" defaultValue={v.number} placeholder="Number" style={{ padding: "8px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                                        <input name="type" defaultValue={v.type || ""} placeholder="Type" style={{ padding: "8px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                                        <input name="capacity" type="number" defaultValue={v.capacity || ""} placeholder="Capacity" style={{ padding: "8px", borderRadius: "6px", border: "1px solid var(--border)" }} />
-                                                        <select name="active" defaultValue={v.active ? "true" : "false"} style={{ padding: "8px", borderRadius: "6px", border: "1px solid var(--border)" }}>
-                                                            <option value="true">Active</option>
-                                                            <option value="false">Inactive</option>
-                                                        </select>
-                                                        <button type="submit" className="btn btn-primary" style={{ marginTop: "4px" }}>Save Changes</button>
-                                                    </div>
-                                                </form>
-
-                                                {v.active && (
-                                                    <>
-                                                        <hr style={{ margin: "12px 0", border: "none", borderTop: "1px solid var(--border)" }} />
-                                                        <form action="/api/vehicles/delete" method="post">
-                                                            <input type="hidden" name="id" value={v.id} />
-                                                            <button type="submit" className="btn" style={{ width: "100%", background: "var(--danger-bg)", color: "var(--danger-text)", border: "none" }}>
-                                                                Deactivate Vehicle
-                                                            </button>
-                                                        </form>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </details>
+                                        <ManageVehicleModal vehicle={v} />
                                     </td>
                                 </tr>
                             ))}

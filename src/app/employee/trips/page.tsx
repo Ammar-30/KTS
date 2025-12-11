@@ -82,7 +82,19 @@ export default async function MyTripsPage() {
                                     )}
                                 </td>
                                 <td style={{ fontWeight: 500 }}>{companyLabel(t.company)}</td>
-                                <td style={{ textAlign: "center", color: "var(--text-secondary)" }}>{t.passengerNames || "-"}</td>
+                                <td style={{ textAlign: "center", color: "var(--text-secondary)" }}>
+                                    {(() => {
+                                        try {
+                                            const passengers = typeof t.passengerNames === 'string'
+                                                ? JSON.parse(t.passengerNames)
+                                                : t.passengerNames;
+                                            if (!passengers || passengers.length === 0) return "—";
+                                            return passengers.join(", ");
+                                        } catch {
+                                            return "—";
+                                        }
+                                    })()}
+                                </td>
                                 <td style={{ fontWeight: 600, color: "var(--text-main)" }}>{t.purpose}</td>
                                 <td>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: "13px" }}>
@@ -103,16 +115,16 @@ export default async function MyTripsPage() {
                                     {canCancel(t.status) ? (
                                         <form action="/api/trips/cancel" method="post" style={{ display: "inline-block" }}>
                                             <input type="hidden" name="tripId" value={t.id} />
-                                            <button 
-                                                className="btn btn-secondary" 
-                                                style={{ 
-                                                    padding: "8px 16px", 
-                                                    fontSize: "13px", 
-                                                    color: "var(--danger-text)", 
-                                                    borderColor: "var(--danger-border)", 
+                                            <button
+                                                className="btn btn-secondary"
+                                                style={{
+                                                    padding: "8px 16px",
+                                                    fontSize: "13px",
+                                                    color: "var(--danger-text)",
+                                                    borderColor: "var(--danger-border)",
                                                     background: "white",
                                                     whiteSpace: "nowrap"
-                                                }} 
+                                                }}
                                                 type="submit"
                                             >
                                                 Cancel
