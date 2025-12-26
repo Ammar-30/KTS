@@ -1,79 +1,82 @@
-# KIPS Transport (Next.js 16 + Prisma + SQLite)
+# KIPS Transport Management System
 
-Role-based transport request flow with 2-step approval and email on assignment. Minimal CSS, strict TypeScript, JWT cookie auth.
+A premium, modern transport management solution built with **Next.js 16**, **Prisma**, and **SQLite**. This system provides a streamlined, role-based workflow for transport requests, approvals, and vehicle assignments.
 
-## Stack
-- Next.js 16 (App Router), React 19
-- Prisma ORM + SQLite
-- `jose` (JWT), `bcrypt` (passwords)
-- Nodemailer SMTP (safe no-op when unset)
+## ✨ Key Features
 
-## Setup
+- **Role-Based Access Control (RBAC)**: Secure dashboards for Employees, Managers, Transport Officers, and Admins.
+- **Centralized Middleware**: Global authentication and permission guarding using Next.js Middleware.
+- **Automated Workflow**: 
+  - Employees request transport for specific companies and departments.
+  - Managers review and approve/reject requests.
+  - Transport Officers assign drivers and vehicles to approved trips.
+- **Maintenance Management**: Track and report issues for fleet and entitled vehicles.
+- **TADA Requests**: Integrated TA/DA management for travel-related expenses.
+- **Modern UI**: Polished interface with smooth transitions and premium aesthetics.
+- **Notification System**: Real-time feedback and status updates.
 
-```bash
-# 1) Install
-npm i
+## 🛠 Tech Stack
 
-# 2) Create DB & migrate
-npx prisma migrate dev --name init
+- **Framework**: Next.js 16 (App Router)
+- **Runtime**: React 19
+- **Database**: SQLite with Prisma ORM
+- **Authentication**: JWT-based session management (`jose`)
+- **Validation**: Strict schema validation with `Zod`
+- **Styling**: Premium CSS with modern design tokens
+- **Animations**: Framer Motion for smooth interactions
 
-# 3) Seed users
-npm run seed
+## 🚀 Getting Started
 
-# 4) Run dev
-npm run dev
+### Prerequisites
 
-# 5) (optional) Prisma Studio
-npm run studio
-```
+- Node.js >= 20.0.0
+- npm
 
-### Accounts (seeded)
-- EMPLOYEE: salmanammar322@gmail.com / Pass@1234
-- MANAGER : salmanmaqsood7@gmail.com / Pass@1234
-- TRANSPORT: transport@kips.pk / Pass@1234
+### Installation
 
-## Env
-Copy `.env.example` to `.env` and set:
-```
-DATABASE_URL="file:./dev.db"
-JWT_SECRET=some-long-random-string
-SMTP_HOST=...
-SMTP_PORT=587
-SMTP_USER=...
-SMTP_PASS=...
-MAIL_FROM="KIPS Transport <no-reply@kips.pk>"
-```
+1. **Clone and Install**
+   ```bash
+   git clone https://github.com/Ammar-30/KTS.git
+   cd KTS
+   npm install
+   ```
 
-If mail envs are missing, emails will **not** send (logged to console instead).
+2. **Environment Configuration**
+   Create a `.env` file in the root directory:
+   ```env
+   DATABASE_URL="file:./prisma/dev.db"
+   JWT_SECRET="your-32-character-secret-key"
+   ```
 
-## Flow
-1. **Employee** creates request with **Company** (KIPS Preps / TETB / Quality Brands / KDP) and optional **Department**.
-2. **Manager** approves/rejects.
-3. **Transport** assigns driver/vehicle → requester gets email (includes Company & Department).
+3. **Database Initialization**
+   ```bash
+   npx prisma migrate dev --name init
+   npm run seed
+   ```
 
-## Routes
-- `/login` — sign in (redirects by role)
-- `/employee` — request form + "My Trips"
-- `/manager` — pending list (approve/reject)
-- `/transport` — approved list (assign)
-- `/profile` — change password
+4. **Run Development Server**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-## APIs
-- `POST /api/auth/login`
-- `POST /api/auth/logout`
-- `GET  /api/auth/me`
-- `POST /api/auth/change-password`
+## 🔐 Security
 
-- `POST /api/trips/create`
-- `GET  /api/trips/my`
-- `GET  /api/trips/pending`
-- `POST /api/trips/approve`
-- `GET  /api/trips/approved`
-- `POST /api/trips/assign`
+The project implements several security best practices:
+- **Global Middleware**: Centralized session verification and role checks.
+- **Input Sanitization**: HTML stripping and validation for all user inputs.
+- **Secure Headers**: Hardened `next.config.ts` with CSP, X-Frame-Options, and more.
+- **Transaction Management**: Atomic database operations to prevent data inconsistency and race conditions.
 
-All endpoints return structured JSON with proper status codes.
+## 👥 Seeded Accounts
 
-## Notes
-- Emails/usernames are immutable (only password changes).
-- Guards: visiting dashboards without session redirects to `/login`.
-- Minimal styling; we’ll refine UI later.
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | admin@kips.pk | password123 |
+| **Manager** | manager@kips.pk | password123 |
+| **Transport** | transport@kips.pk | password123 |
+| **Employee** | ali.hassan@kips.pk | password123 |
+
+---
+
+© 2025 KIPS Education System. All rights reserved.

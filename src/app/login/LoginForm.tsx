@@ -26,7 +26,8 @@ export default function LoginForm() {
 
             if (!res.ok) {
                 const j = await res.json().catch(() => ({}));
-                throw new Error(j.error || "Login failed");
+                const errorMessage = j.error?.message || j.error || "Login failed";
+                throw new Error(errorMessage);
             }
 
             const { role } = await res.json();
