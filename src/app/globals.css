@@ -442,7 +442,7 @@ textarea:hover {
     scale: 1;
 }
 
-input:focus,
+input:not([type="radio"]):not([type="checkbox"]):focus,
 select:focus,
 textarea:focus {
     outline: none;
@@ -465,6 +465,12 @@ textarea:focus {
         box-shadow: 0 0 0 6px rgba(79, 70, 229, 0.15),
             0 0 0 2px var(--primary);
     }
+}
+
+input[type="radio"]:focus,
+input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 .input-wrapper {

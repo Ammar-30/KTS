@@ -75,7 +75,10 @@ export class TripService {
       async (tx) => {
         const trip = await tx.trip.findUnique({
           where: { id: input.tripId },
-          include: { requester: { select: { id: true, name: true, email: true } } },
+          include: {
+            requester: { select: { id: true, name: true, email: true } },
+            entitledVehicle: { select: { vehicleNumber: true } },
+          },
         });
 
         if (!trip) {
@@ -93,24 +96,46 @@ export class TripService {
         }
 
         // Determine new status
-        const newStatus =
+        let newStatus: TripStatus =
           input.decision === "reject"
             ? TRIP_STATUS.MANAGER_REJECTED
             : TRIP_STATUS.MANAGER_APPROVED;
+
+        // Special: PERSONAL or ENTITLED vehicles skip Transport department
+        const isSelfManaged =
+          input.decision === "approve" &&
+          (trip.vehicleCategory === "PERSONAL" || trip.vehicleCategory === "ENTITLED");
+
+        if (isSelfManaged) {
+          newStatus = TRIP_STATUS.TRANSPORT_ASSIGNED;
+        }
 
         // Validate transition
         if (!isValidTransition(trip.status, newStatus, TRIP_STATUS_TRANSITIONS)) {
           throw new StateTransitionError(trip.status, newStatus);
         }
 
+        // Prepare update data
+        const updateData: any = {
+          status: newStatus,
+          approvedById: session.sub,
+          rejectionReason: input.decision === "reject" ? (input.rejectionReason || null) : null,
+        };
+
+        // If self-managed, auto-assign
+        if (isSelfManaged) {
+          updateData.assignedById = session.sub;
+          updateData.driverName = trip.requester.name; // Requester is the driver
+          updateData.vehicleNumber =
+            trip.vehicleCategory === "PERSONAL"
+              ? trip.personalVehicleDetails || "Personal Vehicle"
+              : trip.entitledVehicle?.vehicleNumber || "Entitled Vehicle";
+        }
+
         // Update trip
         const updatedTrip = await tx.trip.update({
           where: { id: input.tripId },
-          data: {
-            status: newStatus,
-            approvedById: session.sub,
-            rejectionReason: input.decision === "reject" ? (input.rejectionReason || null) : null,
-          },
+          data: updateData,
           include: {
             requester: { select: { id: true, name: true, email: true } },
           },
@@ -118,14 +143,20 @@ export class TripService {
 
         // Notify requester (within transaction using tx client)
         try {
+          const type = input.decision === "reject" ? "TRIP_REJECTED" : (isSelfManaged ? "VEHICLE_ASSIGNED" : "TRIP_APPROVED");
+          const title = input.decision === "reject" ? "Trip Request Rejected" : (isSelfManaged ? "Trip Approved & Assigned" : "Trip Request Approved");
+          const message = input.decision === "reject"
+            ? `Your trip request "${trip.purpose}" has been rejected.${input.rejectionReason ? ` Reason: ${input.rejectionReason}` : ""}`
+            : (isSelfManaged
+              ? `Your trip request "${trip.purpose}" has been approved and auto-assigned (Personal/Entitled Vehicle).`
+              : `Your trip request "${trip.purpose}" has been approved.`);
+
           await tx.notification.create({
             data: {
               userId: trip.requesterId,
-              type: input.decision === "approve" ? "TRIP_APPROVED" : "TRIP_REJECTED",
-              title: input.decision === "approve" ? "Trip Request Approved" : "Trip Request Rejected",
-              message: input.decision === "approve"
-                ? `Your trip request "${trip.purpose}" has been approved.`
-                : `Your trip request "${trip.purpose}" has been rejected.${input.rejectionReason ? ` Reason: ${input.rejectionReason}` : ""}`,
+              type,
+              title,
+              message,
               link: "/employee/trips",
             },
           });
