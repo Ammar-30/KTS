@@ -35,6 +35,20 @@ export class TripService {
       throw new NotFoundError("User");
     }
 
+    // Double check entitlement if category is ENTITLED
+    if (input.vehicleCategory === "ENTITLED") {
+      const vehicle = await prisma.entitledVehicle.findFirst({
+        where: {
+          id: input.entitledVehicleId || undefined,
+          userId: requesterId,
+          active: true,
+        },
+      });
+      if (!vehicle) {
+        throw new ForbiddenError("You do not have an active entitled vehicle assigned");
+      }
+    }
+
     const trip = await tripRepository.create({
       purpose: input.purpose,
       fromLoc: input.fromLoc,
@@ -171,6 +185,33 @@ export class TripService {
         timeout: 30000,
       }
     );
+
+    // Notify transport department (non-blocking, outside transaction)
+    if (result.updatedTrip.status === TRIP_STATUS.MANAGER_APPROVED) {
+      try {
+        await createNotificationsForRole({
+          role: "TRANSPORT",
+          type: "TRIP_APPROVED",
+          title: "New Approved Trip • Needs Assignment",
+          message: `Trip "${result.tripPurpose}" for ${result.updatedTrip.requester.name} has been approved and requires vehicle/driver assignment.`,
+          link: "/transport",
+        });
+      } catch (error) {
+        logger.error({ error, tripId: result.updatedTrip.id }, "Failed to notify transport of approved trip");
+      }
+    } else if (result.updatedTrip.status === TRIP_STATUS.TRANSPORT_ASSIGNED) {
+      try {
+        await createNotificationsForRole({
+          role: "TRANSPORT",
+          type: "VEHICLE_ASSIGNED",
+          title: "Trip Auto-Assigned (Record)",
+          message: `Trip "${result.tripPurpose}" for ${result.updatedTrip.requester.name} has been auto-assigned (${result.updatedTrip.vehicleCategory}).`,
+          link: "/transport",
+        });
+      } catch (error) {
+        logger.error({ error, tripId: result.updatedTrip.id }, "Failed to notify transport of auto-assigned trip");
+      }
+    }
 
     return result.updatedTrip;
   }

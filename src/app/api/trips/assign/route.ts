@@ -56,40 +56,42 @@ async function handler(req: NextRequest) {
   const { trip, driver, vehicle } = await tripService.assignTrip(input, session);
 
   logger.info(
-    { tripId: trip.id, driverId: driver.id, vehicleId: vehicle.id, userId: session.sub },
-    "Trip assigned"
+    { tripId: trip.id, driverId: driver.id, vehicleId: vehicle.id, userId: session.sub, recipient: trip.requester?.email },
+    "Trip assigned, sending email..."
   );
 
-  // Send email (non-blocking, fire and forget)
-  sendAssignmentEmail({
-    to: trip.requester!.email,
-    subject: "Vehicle Assigned — KIPS Transport",
-    html: `
-      <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0b1220">
-        <h2 style="color:#2563eb;margin:0 0 10px">Transport Assignment Confirmation</h2>
-        <p style="margin:0 0 10px">Dear ${trip.requester?.name ?? "Employee"},</p>
-        <p style="margin:0 0 12px">Your request has been <strong>assigned</strong>. Trip details are below:</p>
-        <table style="border-collapse:collapse;font-size:14px">
-          <tr><td style="padding:2px 8px 2px 0"><strong>Purpose:</strong></td><td>${escapeHtml(trip.purpose)}</td></tr>
-          <tr><td style="padding:2px 8px 2px 0"><strong>Company:</strong></td><td>${companyLabel(trip.company)}</td></tr>
-          <tr><td style="padding:2px 8px 2px 0"><strong>Department:</strong></td><td>${trip.department ?? "-"}</td></tr>
-          <tr><td style="padding:2px 8px 2px 0"><strong>Passengers:</strong></td><td>${trip.passengerNames || "-"}</td></tr>
-          <tr><td style="padding:2px 8px 2px 0"><strong>From:</strong></td><td>${escapeHtml(trip.fromLoc)}</td></tr>
-          <tr><td style="padding:2px 8px 2px 0"><strong>To:</strong></td><td>${escapeHtml(trip.toLoc)}</td></tr>
-          <tr><td style="padding:2px 8px 2px 0"><strong>Departure:</strong></td><td>${fmt(trip.fromTime)}</td></tr>
-          <tr><td style="padding:2px 8px 2px 0"><strong>Return:</strong></td><td>${fmt(trip.toTime)}</td></tr>
-          <tr><td style="padding:2px 8px 2px 0"><strong>Driver:</strong></td><td>${escapeHtml(driver.name)}</td></tr>
-          <tr><td style="padding:2px 8px 2px 0"><strong>Driver Contact:</strong></td><td>${driver.phone || "Not provided"}</td></tr>
-          <tr><td style="padding:2px 8px 2px 0"><strong>Vehicle:</strong></td><td>${escapeHtml(vehicle.number)}</td></tr>
-          <tr><td style="padding:2px 8px 2px 0"><strong>Trip ID:</strong></td><td>${trip.id}</td></tr>
-        </table>
-        <p style="margin:12px 0 0">Safe travels,<br/><strong>KIPS Transport Department</strong></p>
-      </div>
-    `,
-    text: `Your transport request has been assigned.\nPurpose: ${trip.purpose}\nCompany: ${companyLabel(trip.company)}\nDepartment: ${trip.department ?? "-"}\nPassengers: ${trip.passengerNames || "-"}\nFrom: ${trip.fromLoc} → ${trip.toLoc}\nTime: ${fmt(trip.fromTime)} → ${fmt(trip.toTime)}\nDriver: ${driver.name}\nDriver Contact: ${driver.phone || "Not provided"}\nVehicle: ${vehicle.number}\nTrip ID: ${trip.id}`,
-  }).catch((error) => {
+  // Send email (awaited for reliability)
+  try {
+    await sendAssignmentEmail({
+      to: trip.requester!.email,
+      subject: "Vehicle Assigned — KIPS Transport",
+      html: `
+        <div style="font-family:Arial,sans-serif;line-height:1.6;color:#0b1220">
+          <h2 style="color:#2563eb;margin:0 0 10px">Transport Assignment Confirmation</h2>
+          <p style="margin:0 0 10px">Dear ${trip.requester?.name ?? "Employee"},</p>
+          <p style="margin:0 0 12px">Your request has been <strong>assigned</strong>. Trip details are below:</p>
+          <table style="border-collapse:collapse;font-size:14px">
+            <tr><td style="padding:2px 8px 2px 0"><strong>Purpose:</strong></td><td>${escapeHtml(trip.purpose)}</td></tr>
+            <tr><td style="padding:2px 8px 2px 0"><strong>Company:</strong></td><td>${companyLabel(trip.company)}</td></tr>
+            <tr><td style="padding:2px 8px 2px 0"><strong>Department:</strong></td><td>${trip.department ?? "-"}</td></tr>
+            <tr><td style="padding:2px 8px 2px 0"><strong>Passengers:</strong></td><td>${trip.passengerNames || "-"}</td></tr>
+            <tr><td style="padding:2px 8px 2px 0"><strong>From:</strong></td><td>${escapeHtml(trip.fromLoc)}</td></tr>
+            <tr><td style="padding:2px 8px 2px 0"><strong>To:</strong></td><td>${escapeHtml(trip.toLoc)}</td></tr>
+            <tr><td style="padding:2px 8px 2px 0"><strong>Departure:</strong></td><td>${fmt(trip.fromTime)}</td></tr>
+            <tr><td style="padding:2px 8px 2px 0"><strong>Return:</strong></td><td>${fmt(trip.toTime)}</td></tr>
+            <tr><td style="padding:2px 8px 2px 0"><strong>Driver:</strong></td><td>${escapeHtml(driver.name)}</td></tr>
+            <tr><td style="padding:2px 8px 2px 0"><strong>Driver Contact:</strong></td><td>${driver.phone || "Not provided"}</td></tr>
+            <tr><td style="padding:2px 8px 2px 0"><strong>Vehicle:</strong></td><td>${escapeHtml(vehicle.number)}</td></tr>
+            <tr><td style="padding:2px 8px 2px 0"><strong>Trip ID:</strong></td><td>${trip.id}</td></tr>
+          </table>
+          <p style="margin:12px 0 0">Safe travels,<br/><strong>KIPS Transport Department</strong></p>
+        </div>
+      `,
+      text: `Your transport request has been assigned.\nPurpose: ${trip.purpose}\nCompany: ${companyLabel(trip.company)}\nDepartment: ${trip.department ?? "-"}\nPassengers: ${trip.passengerNames || "-"}\nFrom: ${trip.fromLoc} → ${trip.toLoc}\nTime: ${fmt(trip.fromTime)} → ${fmt(trip.toTime)}\nDriver: ${driver.name}\nDriver Contact: ${driver.phone || "Not provided"}\nVehicle: ${vehicle.number}\nTrip ID: ${trip.id}`,
+    });
+  } catch (error) {
     logger.error({ error, tripId: trip.id }, "Failed to send assignment email");
-  });
+  }
 
   // Handle response format
   const contentType = req.headers.get("content-type") || "";

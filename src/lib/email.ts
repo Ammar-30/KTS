@@ -30,27 +30,38 @@ const transporter =
         })
         : null;
 
+if (transporter) {
+    logger.info({ HOST, PORT, FROM, USER: USER ? '***' : 'missing' }, "SMTP Transporter initialized successfully");
+} else {
+    logger.warn({
+        hasHost: !!HOST,
+        hasUser: !!USER,
+        hasPass: !!PASS
+    }, "SMTP Transporter failed to initialize. Check .env variables: SMTP_HOST, SMTP_USER, SMTP_PASS");
+}
+
 /**
  * sendAssignmentEmail — send rich email (subject/html/text).
  * Gracefully no-ops if creds are missing.
  */
 export async function sendAssignmentEmail({
-                                              to,
-                                              subject,
-                                              html,
-                                              text,
-                                          }: {
+    to,
+    subject,
+    html,
+    text,
+}: {
     to: string;
     subject: string;
     html: string;
     text?: string;
 }) {
     if (!transporter) {
-        logger.debug({ HOST, PORT, FROM, to, subject }, "Email skipped - missing SMTP credentials");
+        logger.warn({ HOST, PORT, FROM, to, subject }, "Email skipped - transporter not initialized. Check SMTP credentials in .env");
         return;
     }
 
     try {
+        logger.debug({ to, subject }, "Attempting to send email...");
         const info = await transporter.sendMail({
             from: FROM,
             to,
@@ -60,6 +71,7 @@ export async function sendAssignmentEmail({
         });
         logger.info({ messageId: info.messageId, to }, "Email sent successfully");
     } catch (err) {
-        logger.error({ error: err, to, subject }, "Email send failed");
+        logger.error({ error: err, to, subject, smtpConfig: { HOST, PORT, USER: USER ? '***' : 'missing' } }, "Email send failed");
+        throw err; // Rethrow so the caller knows it failed
     }
 }

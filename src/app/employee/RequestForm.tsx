@@ -47,6 +47,12 @@ export default function RequestForm({ department, entitledVehicles = [] }: { dep
     const [category, setCategory] = useState("FLEET");
 
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        if (category === "ENTITLED" && entitledVehicles.length === 0) {
+            e.preventDefault();
+            alert("You cannot submit an 'Officially Entitled' request without an assigned vehicle.");
+            return;
+        }
+
         if (fromTime && toTime && toTime < fromTime) {
             e.preventDefault();
             alert("Return time must be the same as or after the departure time.");
@@ -324,7 +330,12 @@ export default function RequestForm({ department, entitledVehicles = [] }: { dep
 
             <div style={{ height: 12 }} />
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button type="submit" className="button primary">
+                <button
+                    type="submit"
+                    className="button primary"
+                    disabled={category === "ENTITLED" && entitledVehicles.length === 0}
+                    title={category === "ENTITLED" && entitledVehicles.length === 0 ? "No entitled vehicle assigned" : ""}
+                >
                     Submit Request
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ width: 18, height: 18 }}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
