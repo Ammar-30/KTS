@@ -25,7 +25,7 @@ export class TadaService {
         }
 
         // Validate trip status
-        const allowedStatuses = ["ManagerApproved", "TransportAssigned", "InProgress", "Completed"];
+        const allowedStatuses = ["ManagerApproved", "Approved", "TransportAssigned", "InProgress", "Completed"];
         if (!allowedStatuses.includes(trip.status)) {
           throw new ConflictError("Trip must be approved or completed to claim allowance");
         }
@@ -91,7 +91,7 @@ export class TadaService {
         }
 
         // Validate trip status
-        const allowedStatuses = ["ManagerApproved", "TransportAssigned", "InProgress", "Completed"];
+        const allowedStatuses = ["ManagerApproved", "Approved", "TransportAssigned", "InProgress", "Completed"];
         if (!allowedStatuses.includes(trip.status)) {
           throw new ConflictError("Trip must be approved or completed to claim allowance");
         }

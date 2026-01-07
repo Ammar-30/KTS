@@ -24,7 +24,7 @@ async function getData() {
     const eligibleTrips = await prisma.trip.findMany({
         where: {
             requesterId: session.sub,
-            status: { in: ["Approved", "TransportAssigned", "InProgress", "Completed"] }
+            status: { in: ["ManagerApproved", "TransportAssigned", "InProgress", "Completed"] }
         },
         orderBy: { createdAt: "desc" }
     });

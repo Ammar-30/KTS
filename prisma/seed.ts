@@ -128,7 +128,7 @@ async function main() {
             company: "KDP",
             department: "HR",
             requesterId: employee3.id,
-            status: "Approved",
+            status: "ManagerApproved",
             approvedById: manager.id,
             vehicleCategory: "PERSONAL",
             personalVehicleDetails: "Honda City LEA-9999"
@@ -146,7 +146,7 @@ async function main() {
             company: "KIPS_PREPS",
             department: "Marketing",
             requesterId: employee1.id,
-            status: "Approved",
+            status: "ManagerApproved",
             approvedById: manager.id,
             vehicleCategory: "ENTITLED",
             entitledVehicleId: entitledVehicle1.id
