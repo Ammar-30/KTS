@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import Modal from "@/components/Modal";
+import Modal from "@/components/ui/Modal";
 
 interface Vehicle {
     id: string;

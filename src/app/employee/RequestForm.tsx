@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import DateTimePicker from "@/components/DateTimePicker";
+import DateTimePicker from "@/components/ui/DateTimePicker";
 
 // Icons
 const Icons = {

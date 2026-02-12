@@ -1,82 +1,101 @@
-# KIPS Transport Management System
+# 🚛 KIPS Transport Management System (KTS)
 
-A premium, modern transport management solution built with **Next.js 16**, **Prisma**, and **SQLite**. This system provides a streamlined, role-based workflow for transport requests, approvals, and vehicle assignments.
+> **Modern, efficient, and reliable transport management for the education sector.**
 
-## ✨ Key Features
+Welcome to the KIPS Transport System (KTS)! 🎓🚌
 
-- **Role-Based Access Control (RBAC)**: Secure dashboards for Employees, Managers, Transport Officers, and Admins.
-- **Centralized Middleware**: Global authentication and permission guarding using Next.js Middleware.
-- **Automated Workflow**: 
-  - Employees request transport for specific companies and departments.
-  - Managers review and approve/reject requests.
-  - Transport Officers assign drivers and vehicles to approved trips.
-- **Maintenance Management**: Track and report issues for fleet and entitled vehicles.
-- **TADA Requests**: Integrated TA/DA management for travel-related expenses.
-- **Modern UI**: Polished interface with smooth transitions and premium aesthetics.
-- **Notification System**: Real-time feedback and status updates.
+This project was built to solve a real-world problem: managing the complex logistics of transport for a large educational network. It replaces outdated manual processes with a sleek, automated, and role-based digital workflow.
 
-## 🛠 Tech Stack
-
-- **Framework**: Next.js 16 (App Router)
-- **Runtime**: React 19
-- **Database**: SQLite with Prisma ORM
-- **Authentication**: JWT-based session management (`jose`)
-- **Validation**: Strict schema validation with `Zod`
-- **Styling**: Premium CSS with modern design tokens
-- **Animations**: Framer Motion for smooth interactions
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js >= 20.0.0
-- npm
-
-### Installation
-
-1. **Clone and Install**
-   ```bash
-   git clone https://github.com/Ammar-30/KTS.git
-   cd KTS
-   npm install
-   ```
-
-2. **Environment Configuration**
-   Create a `.env` file in the root directory:
-   ```env
-   DATABASE_URL="file:./prisma/dev.db"
-   JWT_SECRET="your-32-character-secret-key"
-   ```
-
-3. **Database Initialization**
-   ```bash
-   npx prisma migrate dev --name init
-   npm run seed
-   ```
-
-4. **Run Development Server**
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) to view the application.
-
-## 🔐 Security
-
-The project implements several security best practices:
-- **Global Middleware**: Centralized session verification and role checks.
-- **Input Sanitization**: HTML stripping and validation for all user inputs.
-- **Secure Headers**: Hardened `next.config.ts` with CSP, X-Frame-Options, and more.
-- **Transaction Management**: Atomic database operations to prevent data inconsistency and race conditions.
-
-## 👥 Seeded Accounts
-
-| Role | Email | Password |
-|------|-------|----------|
-| **Admin** | admin@kips.pk | password123 |
-| **Manager** | manager@kips.pk | password123 |
-| **Transport** | transport@kips.pk | password123 |
-| **Employee** | ali.hassan@kips.pk | password123 |
+Whether you're an Admin overseeing the entire fleet, a Manager approving travel requests, or a Transport Officer assigning vehicles—KTS makes your life easier.
 
 ---
 
-© 2025 KIPS Education System. All rights reserved.
+## ✨ Why This Project Exists
+
+Managing transport for hundreds of employees across multiple campuses is chaos without the right tools. We built KTS to:
+
+*   **Kill the Paperwork:** No more lost forms or manual tracking.
+*   **Streamline Approvals:** Requests flow instantly from Employee → Manager → Transport.
+*   **Boost Accountability:** Every trip, vehicle, and maintenance request is tracked and logged.
+*   **Look Good Doing It:** Who says enterprise software has to be ugly? We focused heavily on a premium, modern UI.
+
+## 🚀 Key Features
+
+*   **🔐 Role-Based Power:** Secure, custom dashboards for Employees, Managers, Transport Officers, and Admins. Everyone sees exactly what they need.
+*   **⚡ Automated Workflows:**
+    *   **Request:** Employees book requests in seconds.
+    *   **Approve:** Managers get notified and approve with one click.
+    *   **Assign:** Transport team assigns drivers/vehicles seamlessly.
+*   **🛠 Fleet Health:** dedicated modules for tracking vehicle maintenance and repairs.
+*   **💸 TADA Management:** Integrated travel allowance calculations and approvals.
+*   **🔔 Real-Time Updates:** Always know the status of your request.
+
+## 🛠 Under the Hood
+
+We used a modern stack to ensure performance, security, and scalability:
+
+*   **Next.js 16 (App Router):** The latest and greatest for fast, server-side rendered apps.
+*   **Prisma & SQLite:** robust ORM with a lightweight database for easy setup.
+*   **React 19:** Leveraging the newest React features.
+*   **Zod & TypeScript:** Rock-solid type safety and validation.
+*   **Framer Motion:** Smooth, professional animations that make the app feel alive.
+*   **Tailwind CSS:** For that pixel-perfect, custom design.
+
+---
+
+## 🏁 Getting Started
+
+Want to take it for a spin? functionality is just a few commands away.
+
+### 1. Clone the Repo
+```bash
+git clone https://github.com/Ammar-30/KTS.git
+cd KTS
+```
+
+### 2. Install Dependencies
+```bash
+npm install
+```
+
+### 3. Set Up Environment
+Create a `.env` file in the root directory. You'll need a database URL and a JWT secret.
+```env
+DATABASE_URL="file:./prisma/dev.db"
+JWT_SECRET="super-secret-key-change-me"
+```
+
+### 4. Initialize Database
+```bash
+npx prisma migrate dev --name init
+npm run seed  # This populates the app with dummy data so you can test right away!
+```
+
+### 5. Run it!
+```bash
+npm run dev
+```
+Visit `http://localhost:3000` and you're live! 🚀
+
+---
+
+## 🧪 Default Login Credentials
+
+We've pre-loaded some accounts for you to test different roles:
+
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **Admin** | `admin@kips.pk` | `password123` |
+| **Manager** | `manager@kips.pk` | `password123` |
+| **Transport** | `transport@kips.pk` | `password123` |
+| **Employee** | `ali.hassan@kips.pk` | `password123` |
+
+---
+
+## 👨‍💻 Built By
+
+**Ammar** - *Senior Software Engineer*
+
+---
+
+*© 2025 KIPS Education System. Built with ❤️ and code.*

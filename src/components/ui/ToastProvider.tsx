@@ -1,8 +1,8 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback } from "react";
-import { ToastContainer } from "./animations";
-import { ToastType } from "./animations";
+import { ToastContainer } from "../animations/Toast";
+import { ToastType } from "../animations/Toast";
 
 interface Toast {
     id: string;

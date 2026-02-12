@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@lib/db";
 import { getSession } from "@lib/auth";
 import { fmtDateTime } from "@lib/utils";
-import ReportIssueModal from "@/components/ReportIssueModal";
+import ReportIssueModal from "@/components/maintenance/ReportIssueModal";
 
 async function getData() {
     const session = await getSession();

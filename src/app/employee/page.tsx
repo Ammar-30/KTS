@@ -6,8 +6,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@lib/db";
 import { getSession } from "@lib/auth";
-import StatCard from "@/components/StatCard";
-import StatusBadge from "@/components/StatusBadge";
+import StatCard from "@/components/ui/StatCard";
+import StatusBadge from "@/components/ui/StatusBadge";
 
 
 async function getData() {

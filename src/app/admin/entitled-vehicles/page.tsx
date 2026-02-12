@@ -5,9 +5,9 @@ export const revalidate = 0;
 import { redirect } from "next/navigation";
 import { prisma } from "@lib/db";
 import { getSession } from "@lib/auth";
-import StatCard from "@/components/StatCard";
-import UserAvatar from "@/components/UserAvatar";
-import DeleteVehicleButton from "@/components/DeleteVehicleButton";
+import StatCard from "@/components/ui/StatCard";
+import UserAvatar from "@/components/ui/UserAvatar";
+import DeleteVehicleButton from "@/components/vehicles/DeleteVehicleButton";
 import AddEntitledVehicleModal from "./AddEntitledVehicleModal";
 
 async function getData() {

@@ -2,8 +2,8 @@
 
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
-import NotificationCentre from "./NotificationCentre";
-import { PageTransition } from "./animations";
+import NotificationCentre from "../notifications/NotificationCentre";
+import { PageTransition } from "../animations";
 import { ReactNode } from "react";
 
 interface DashboardLayoutProps {

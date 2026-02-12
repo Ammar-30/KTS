@@ -5,7 +5,7 @@ export const revalidate = 0;
 import { redirect } from "next/navigation";
 import { prisma } from "@lib/db";
 import { getSession } from "@lib/auth";
-import StatCard from "@/components/StatCard";
+import StatCard from "@/components/ui/StatCard";
 import VehicleImageModal from "./VehicleImageModal";
 
 async function getData() {

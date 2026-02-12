@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import UserAvatar from "@/components/UserAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { AnimatedDropdown } from "@/components/animations";
 
 type UserMeta = { name?: string; email?: string; role?: string };

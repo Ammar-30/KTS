@@ -3,10 +3,10 @@ export const revalidate = 0;
 
 import type { Metadata } from "next";
 import "./globals.css";
-import DashboardLayout from "@/components/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { getSession } from "@lib/auth";
 import { unstable_noStore as noStore } from "next/cache";
-import { ToastProvider } from "@/components/ToastProvider";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 
 export const metadata: Metadata = {
     title: "KIPS Transport",
