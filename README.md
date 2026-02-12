@@ -1,36 +1,7 @@
-# 🚛 KIPS Transport Management System (KTS)
 
-> **Modern, efficient, and reliable transport management for the education sector.**
 
-Welcome to the KIPS Transport System (KTS)! 🎓🚌
 
-This project was built to solve a real-world problem: managing the complex logistics of transport for a large educational network. It replaces outdated manual processes with a sleek, automated, and role-based digital workflow.
-
-Whether you're an Admin overseeing the entire fleet, a Manager approving travel requests, or a Transport Officer assigning vehicles—KTS makes your life easier.
-
----
-
-## ✨ Why This Project Exists
-
-Managing transport for hundreds of employees across multiple campuses is chaos without the right tools. We built KTS to:
-
-*   **Kill the Paperwork:** No more lost forms or manual tracking.
-*   **Streamline Approvals:** Requests flow instantly from Employee → Manager → Transport.
-*   **Boost Accountability:** Every trip, vehicle, and maintenance request is tracked and logged.
-*   **Look Good Doing It:** Who says enterprise software has to be ugly? We focused heavily on a premium, modern UI.
-
-## 🚀 Key Features
-
-*   **🔐 Role-Based Power:** Secure, custom dashboards for Employees, Managers, Transport Officers, and Admins. Everyone sees exactly what they need.
-*   **⚡ Automated Workflows:**
-    *   **Request:** Employees book requests in seconds.
-    *   **Approve:** Managers get notified and approve with one click.
-    *   **Assign:** Transport team assigns drivers/vehicles seamlessly.
-*   **🛠 Fleet Health:** dedicated modules for tracking vehicle maintenance and repairs.
-*   **💸 TADA Management:** Integrated travel allowance calculations and approvals.
-*   **🔔 Real-Time Updates:** Always know the status of your request.
-
-## 🛠 Under the Hood
+## 🛠 TechStack
 
 We used a modern stack to ensure performance, security, and scalability:
 
@@ -44,8 +15,6 @@ We used a modern stack to ensure performance, security, and scalability:
 ---
 
 ## 🏁 Getting Started
-
-Want to take it for a spin? functionality is just a few commands away.
 
 ### 1. Clone the Repo
 ```bash
@@ -91,11 +60,3 @@ We've pre-loaded some accounts for you to test different roles:
 | **Employee** | `ali.hassan@kips.pk` | `password123` |
 
 ---
-
-## 👨‍💻 Built By
-
-**Ammar** - *Senior Software Engineer*
-
----
-
-*© 2025 KIPS Education System. Built with ❤️ and code.*
